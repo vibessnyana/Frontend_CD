@@ -1,69 +1,62 @@
 import { useState } from "react";
+import logo from "../assets/logo.png";
 
 /* ================= BUTTON ================= */
 const Button = ({ children, onClick, variant = "primary" }) => {
-  const base = "px-4 py-2 rounded-lg font-medium transition";
-
   const styles = {
     primary: "bg-red-600 text-white hover:bg-red-700",
-    secondary: "bg-gray-200 hover:bg-gray-300",
+    secondary: "bg-gray-300 text-black",
+    success: "bg-green-600 text-white",
   };
 
   return (
-    <button onClick={onClick} className={`${base} ${styles[variant]}`}>
+    <button
+      onClick={onClick}
+      className={`px-5 py-2 rounded-md text-sm font-medium ${styles[variant]}`}
+    >
       {children}
     </button>
   );
 };
 
-/* ================= SPINNER ================= */
-const Spinner = () => (
-  <div className="flex justify-center items-center h-[300px]">
-    <div className="animate-spin text-4xl">🔄</div>
+/* ================= MODAL ================= */
+const Modal = ({ children }) => (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-xl shadow-lg w-[350px] text-center">
+      {children}
+    </div>
   </div>
 );
 
-/* ================= MODAL ================= */
-const Modal = ({ children }) => {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-[350px] text-center">
-        {children}
-      </div>
+/* ================= LOADING ================= */
+const LoadingModal = () => (
+  <Modal>
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-4 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+      <p className="text-sm text-gray-500">Processing...</p>
     </div>
-  );
-};
+  </Modal>
+);
 
-/* ================= UPLOAD ================= */
-const PlagiarismUpload = ({ onUpload }) => {
-  return (
-    <div className="bg-white p-10 rounded-xl shadow-md text-center w-[500px]">
-      <div className="text-5xl mb-4">📤</div>
-
-      <p className="text-gray-500 mb-6">
-        Upload file untuk cek plagiarisme
-      </p>
-
-      <Button onClick={onUpload}>Upload & Check</Button>
-    </div>
-  );
-};
-
-/* ================= RESULT MODAL ================= */
-const ResultModal = ({
-  percentage,
-  onCancel,
-  onVerify,
-  onSave,
-}) => {
+/* ================= RESULT ================= */
+const ResultModal = ({ percentage, onCancel, onVerify, onSave }) => {
   const isLow = percentage <= 30;
-  const isMedium = percentage > 30 && percentage <= 70;
+  const isMedium = percentage <= 70;
+
+  const color =
+    percentage <= 30
+      ? "text-green-500"
+      : percentage <= 70
+      ? "text-yellow-500"
+      : "text-red-500";
 
   return (
     <Modal>
-      <h1 className="text-4xl font-bold mb-2">{percentage}%</h1>
+      <h1 className={`text-5xl font-bold mb-2 ${color}`}>
+        {percentage}%
+      </h1>
 
-      <p className="text-gray-500 mb-6">
+      <p className="text-gray-500 mb-5 text-sm">
         Terdeteksi Plagiarisme
       </p>
 
@@ -72,144 +65,188 @@ const ResultModal = ({
           Cancel
         </Button>
 
-        {isLow && <Button onClick={onSave}>Save</Button>}
+        {isLow && (
+          <Button variant="success" onClick={onSave}>
+            Save
+          </Button>
+        )}
 
-        {isMedium && (
-          <Button onClick={onVerify}>Verifikasi</Button>
+        {!isLow && isMedium && (
+          <Button variant="success" onClick={onVerify}>
+            Verifikasi
+          </Button>
         )}
       </div>
     </Modal>
   );
 };
 
+/* ================= SIMILARITY ITEM ================= */
+const SimilarityItem = ({ img, percent }) => (
+  <div className="flex items-center gap-3 mb-3">
+    <img src={img} className="w-14 h-14 object-cover rounded-md" />
+    <span className="text-sm font-medium">{percent}%</span>
+  </div>
+);
+
 /* ================= VERIFICATION ================= */
-const PlagiarismVerification = ({ onNext, onCancel }) => {
+const Verification = ({ onNext, onCancel }) => {
+  const internal = [
+    { img: "https://via.placeholder.com/100", percent: 92 },
+    { img: "https://via.placeholder.com/100", percent: 87 },
+    { img: "https://via.placeholder.com/100", percent: 80 },
+  ];
+
+  const external = [
+    { img: "https://via.placeholder.com/100", percent: 78 },
+    { img: "https://via.placeholder.com/100", percent: 70 },
+    { img: "https://via.placeholder.com/100", percent: 65 },
+  ];
+
   return (
-    <div className="bg-white p-10 rounded-xl shadow-md text-center w-[400px]">
-      <img
-        src="https://via.placeholder.com/150"
-        alt="preview"
-        className="mx-auto mb-4 rounded"
-      />
+    <div className="bg-white p-6 rounded-xl shadow w-[900px] flex gap-6">
 
-      <p className="text-gray-500 mb-6">
-        Hasil verifikasi konten
-      </p>
+      <div className="flex-1">
+        <img src="https://via.placeholder.com/400" className="rounded-lg" />
+      </div>
 
-      <div className="flex justify-center gap-3">
-        <Button variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
+      <div className="flex-1 border-l pl-6">
+        <h3 className="font-semibold mb-2">Top 3 Internal</h3>
+        {internal.map((item, i) => (
+          <SimilarityItem key={i} {...item} />
+        ))}
 
-        <Button onClick={onNext}>Next</Button>
+        <h3 className="font-semibold mt-4 mb-2">Top 3 External</h3>
+        {external.map((item, i) => (
+          <SimilarityItem key={i} {...item} />
+        ))}
+
+        <div className="flex justify-end gap-3 mt-6">
+          <Button variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="success" onClick={onNext}>
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
 };
 
 /* ================= FORM ================= */
-const PlagiarismForm = ({ onSubmit, onCancel }) => {
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
+const Form = ({ onSubmit, onCancel }) => (
+  <div className="bg-white p-6 rounded-xl shadow w-[700px] flex gap-6">
+    <img src="https://via.placeholder.com/300" />
 
-  return (
-    <div className="bg-white p-10 rounded-xl shadow-md w-[400px]">
-      <h2 className="text-lg font-semibold mb-4 text-center">
-        Input Data
-      </h2>
+    <div className="flex-1">
+      <h3 className="mb-3 font-semibold">Form</h3>
 
-      <input
-        className="w-full mb-3 px-3 py-2 border rounded-lg"
-        placeholder="Judul"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Judul" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Deskripsi" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Parameter 3" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Parameter 4" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Parameter 5" />
 
-      <input
-        className="w-full mb-4 px-3 py-2 border rounded-lg"
-        placeholder="Deskripsi"
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-      />
-
-      <div className="flex justify-end gap-3">
+      <div className="flex justify-end gap-3 mt-4">
         <Button variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
-
-        <Button onClick={onSubmit}>Save</Button>
+        <Button variant="success" onClick={onSubmit}>
+          Save
+        </Button>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
-/* ================= SUCCESS MODAL ================= */
-const SuccessModal = ({ onClose }) => {
-  return (
-    <Modal>
-      <h2 className="text-lg font-semibold mb-3">
-        ✅ Success
-      </h2>
+/* ================= SUCCESS ================= */
+const SuccessModal = ({ onClose }) => (
+  <Modal>
+    <div className="flex flex-col items-center gap-3">
+      <div className="text-green-500 text-4xl">✔</div>
+      <p>Save successful</p>
+      <Button onClick={onClose}>Oke</Button>
+    </div>
+  </Modal>
+);
 
-      <p className="mb-4 text-gray-500">
-        Data berhasil disimpan
-      </p>
-
-      <Button onClick={onClose}>OK</Button>
-    </Modal>
-  );
-};
-
-/* ================= MAIN PAGE ================= */
-
-const PlagiarismPages = () => {
+/* ================= MAIN ================= */
+export default function PlagiarismPages() {
   const [status, setStatus] = useState("idle");
-  const [percentage, setPercentage] = useState(0);
+  const [percentage, setPercentage] = useState(65);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="w-full min-h-screen bg-gray-200 flex flex-col">
 
-      {/* HEADER */}
-      <div className="bg-red-600 text-white text-center py-6">
-        <h1 className="text-3xl font-bold">
-          Copyright System
-        </h1>
+      {/* 🔥 NAVBAR FIX */}
+      <div className="w-full bg-red-600 h-[80px] flex items-center px-10 text-white">
+
+        {/* LEFT */}
+        <div className="flex-1 flex items-center">
+          <img src={logo} alt="logo" className="h-16 object-contain" />
+        </div>
+
+        {/* CENTER */}
+        <div className="flex-1 flex justify-center gap-12 text-sm font-medium">
+          <p className="cursor-pointer hover:underline">Cek plagiarisme</p>
+          <p className="cursor-pointer hover:underline">Search metadata</p>
+        </div>
+
+        {/* RIGHT */}
+        <div className="flex-1 flex justify-end">
+          <div className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg">
+            <div className="w-7 h-7 bg-gray-300 rounded-full"></div>
+            <span className="text-xs font-medium">
+              Bandung Techno Park
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 flex justify-center items-center">
+      <div className="flex-1 flex flex-col items-center justify-center gap-10">
 
         {status === "idle" && (
-          <PlagiarismUpload
-            onUpload={() => {
-              setStatus("loading");
+          <>
+            <div className="w-[800px] h-[350px] bg-gray-300 rounded-xl flex flex-col items-center justify-center">
+              <div className="text-5xl mb-3">⬆</div>
+              <p>Upload file untuk cek plagiarisme</p>
+            </div>
 
-              setTimeout(() => {
-                setPercentage(65);
-                setStatus("result");
-              }, 1500);
-            }}
-          />
+            <Button
+              onClick={() => {
+                setStatus("loading");
+                setTimeout(() => {
+                  setPercentage(65);
+                  setStatus("result");
+                }, 1500);
+              }}
+            >
+              Cek Plagiarisme
+            </Button>
+          </>
         )}
 
-        {status === "loading" && <Spinner />}
-
         {status === "verification" && (
-          <PlagiarismVerification
+          <Verification
             onNext={() => setStatus("form")}
             onCancel={() => setStatus("idle")}
           />
         )}
 
         {status === "form" && (
-          <PlagiarismForm
+          <Form
             onSubmit={() => setStatus("success")}
             onCancel={() => setStatus("idle")}
           />
         )}
       </div>
 
-      {/* 🔥 RESULT MODAL */}
+      {/* MODALS */}
+      {status === "loading" && <LoadingModal />}
+
       {status === "result" && (
         <ResultModal
           percentage={percentage}
@@ -219,12 +256,9 @@ const PlagiarismPages = () => {
         />
       )}
 
-      {/* SUCCESS */}
       {status === "success" && (
         <SuccessModal onClose={() => setStatus("idle")} />
       )}
     </div>
   );
-};
-
-export default PlagiarismPages;
+}
