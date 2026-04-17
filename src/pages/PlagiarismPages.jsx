@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo1.png";
 
 /* ================= BUTTON ================= */
 const Button = ({ children, onClick, variant = "primary" }) => {
