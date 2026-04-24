@@ -12,7 +12,7 @@ const Button = ({ children, onClick, variant = "primary" }) => {
   return (
     <button
       onClick={onClick}
-      className={`px-5 py-2 rounded-md text-sm font-medium ${styles[variant]}`}
+      className={`px-6 py-2 rounded-md text-sm font-medium ${styles[variant]}`}
     >
       {children}
     </button>
@@ -22,7 +22,7 @@ const Button = ({ children, onClick, variant = "primary" }) => {
 /* ================= MODAL ================= */
 const Modal = ({ children }) => (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-    <div className="bg-white p-6 rounded-xl shadow-lg w-[350px] text-center">
+    <div className="bg-white p-6 rounded-xl shadow-lg w-[400px] text-center">
       {children}
     </div>
   </div>
@@ -31,18 +31,15 @@ const Modal = ({ children }) => (
 /* ================= LOADING ================= */
 const LoadingModal = () => (
   <Modal>
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-10 h-10 border-4 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
       <p className="text-sm text-gray-500">Processing...</p>
     </div>
   </Modal>
 );
 
 /* ================= RESULT ================= */
-const ResultModal = ({ percentage, onCancel, onVerify, onSave }) => {
-  const isLow = percentage <= 30;
-  const isMedium = percentage <= 70;
-
+const ResultModal = ({ percentage, onCancel, onDetail }) => {
   const color =
     percentage <= 30
       ? "text-green-500"
@@ -56,8 +53,12 @@ const ResultModal = ({ percentage, onCancel, onVerify, onSave }) => {
         {percentage}%
       </h1>
 
-      <p className="text-gray-500 mb-5 text-sm">
+      <p className="text-gray-500 mb-2">
         Terdeteksi Plagiarisme
+      </p>
+
+      <p className="text-xs text-gray-400 mb-6">
+        Klik "Lihat Detail" untuk melihat kemiripan
       </p>
 
       <div className="flex justify-center gap-3">
@@ -65,19 +66,70 @@ const ResultModal = ({ percentage, onCancel, onVerify, onSave }) => {
           Cancel
         </Button>
 
-        {isLow && (
-          <Button variant="success" onClick={onSave}>
-            Save
-          </Button>
-        )}
-
-        {!isLow && isMedium && (
-          <Button variant="success" onClick={onVerify}>
-            Verifikasi
-          </Button>
-        )}
+        <Button variant="success" onClick={onDetail}>
+          Lihat Detail
+        </Button>
       </div>
     </Modal>
+  );
+};
+
+/* ================= UPLOAD BOX (FIXED) ================= */
+const UploadBox = ({ file, setFile }) => {
+  const [preview, setPreview] = useState(null);
+
+  const handleFile = (f) => {
+    if (!f.type.startsWith("image/")) {
+      alert("Hanya file gambar!");
+      return;
+    }
+
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  };
+
+  const handleChange = (e) => {
+    const f = e.target.files[0];
+    if (f) handleFile(f);
+  };
+
+  return (
+    <div
+      onDrop={handleDrop}
+      onDragOver={(e) => e.preventDefault()}
+      onClick={() => document.getElementById("fileInput").click()}
+      className="w-[800px] h-[350px] border-2 border-dashed border-gray-400 rounded-2xl bg-gray-100 cursor-pointer flex items-center justify-center p-6"
+    >
+      <input
+        id="fileInput"
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={handleChange}
+      />
+
+      {preview ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <img
+            src={preview}
+            className="max-h-full max-w-full object-contain rounded-lg"
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center">
+          <div className="text-5xl mb-3">⬆</div>
+          <p className="text-lg text-gray-600">
+            Drag & drop gambar atau klik untuk upload
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -89,8 +141,8 @@ const SimilarityItem = ({ img, percent }) => (
   </div>
 );
 
-/* ================= VERIFICATION ================= */
-const Verification = ({ onNext, onCancel }) => {
+/* ================= DETAIL ================= */
+const DetailPage = ({ onVerify, onCancel }) => {
   const internal = [
     { img: "https://via.placeholder.com/100", percent: 92 },
     { img: "https://via.placeholder.com/100", percent: 87 },
@@ -105,7 +157,6 @@ const Verification = ({ onNext, onCancel }) => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow w-[900px] flex gap-6">
-
       <div className="flex-1">
         <img src="https://via.placeholder.com/400" className="rounded-lg" />
       </div>
@@ -121,12 +172,17 @@ const Verification = ({ onNext, onCancel }) => {
           <SimilarityItem key={i} {...item} />
         ))}
 
-        <div className="flex justify-end gap-3 mt-6">
+        <p className="text-xs text-gray-500 mt-4">
+          Klik "Verifikasi" untuk melanjutkan proses penyimpanan metadata karya.
+        </p>
+
+        <div className="flex justify-end gap-3 mt-3">
           <Button variant="secondary" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="success" onClick={onNext}>
-            Next
+
+          <Button variant="success" onClick={onVerify}>
+            Verifikasi
           </Button>
         </div>
       </div>
@@ -142,16 +198,21 @@ const Form = ({ onSubmit, onCancel }) => (
     <div className="flex-1">
       <h3 className="mb-3 font-semibold">Form</h3>
 
-      <input className="w-full mb-2 p-2 border rounded" placeholder="Judul" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="No" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="ki_id" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="ki_uuid" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Judul KI" />
       <input className="w-full mb-2 p-2 border rounded" placeholder="Deskripsi" />
-      <input className="w-full mb-2 p-2 border rounded" placeholder="Parameter 3" />
-      <input className="w-full mb-2 p-2 border rounded" placeholder="Parameter 4" />
-      <input className="w-full mb-2 p-2 border rounded" placeholder="Parameter 5" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Kategori" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Sub Kategori" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Kategori HC" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Sub Kategori HC" />
 
       <div className="flex justify-end gap-3 mt-4">
         <Button variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
+
         <Button variant="success" onClick={onSubmit}>
           Save
         </Button>
@@ -174,35 +235,29 @@ const SuccessModal = ({ onClose }) => (
 /* ================= MAIN ================= */
 export default function PlagiarismPages() {
   const [status, setStatus] = useState("idle");
+  const [file, setFile] = useState(null);
   const [percentage, setPercentage] = useState(65);
 
   return (
     <div className="w-full min-h-screen bg-gray-200 flex flex-col">
 
-      {/* 🔥 NAVBAR FIX */}
-      <div className="w-full bg-red-600 h-[80px] flex items-center px-10 text-white">
-
-        {/* LEFT */}
+      {/* NAVBAR */}
+      <div className="w-full bg-red-600 h-[60px] flex items-center px-10 text-white">
         <div className="flex-1 flex items-center">
-          <img src={logo} alt="logo" className="h-16 object-contain" />
+          <img src={logo} className="h-12 object-contain" />
         </div>
 
-        {/* CENTER */}
         <div className="flex-1 flex justify-center gap-12 text-sm font-medium">
-          <p className="cursor-pointer hover:underline">Cek plagiarisme</p>
-          <p className="cursor-pointer hover:underline">Search metadata</p>
+          <p>Cek plagiarisme</p>
+          <p>Search metadata</p>
         </div>
 
-        {/* RIGHT */}
         <div className="flex-1 flex justify-end">
           <div className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg">
             <div className="w-7 h-7 bg-gray-300 rounded-full"></div>
-            <span className="text-xs font-medium">
-              Bandung Techno Park
-            </span>
+            <span className="text-sm">Bandung Techno Park</span>
           </div>
         </div>
-
       </div>
 
       {/* CONTENT */}
@@ -210,16 +265,18 @@ export default function PlagiarismPages() {
 
         {status === "idle" && (
           <>
-            <div className="w-[800px] h-[350px] bg-gray-300 rounded-xl flex flex-col items-center justify-center">
-              <div className="text-5xl mb-3">⬆</div>
-              <p>Upload file untuk cek plagiarisme</p>
-            </div>
+            <UploadBox file={file} setFile={setFile} />
 
             <Button
               onClick={() => {
+                if (!file) {
+                  alert("Upload gambar dulu!");
+                  return;
+                }
+
                 setStatus("loading");
+
                 setTimeout(() => {
-                  setPercentage(65);
                   setStatus("result");
                 }, 1500);
               }}
@@ -229,9 +286,9 @@ export default function PlagiarismPages() {
           </>
         )}
 
-        {status === "verification" && (
-          <Verification
-            onNext={() => setStatus("form")}
+        {status === "detail" && (
+          <DetailPage
+            onVerify={() => setStatus("form")}
             onCancel={() => setStatus("idle")}
           />
         )}
@@ -242,6 +299,7 @@ export default function PlagiarismPages() {
             onCancel={() => setStatus("idle")}
           />
         )}
+
       </div>
 
       {/* MODALS */}
@@ -251,14 +309,14 @@ export default function PlagiarismPages() {
         <ResultModal
           percentage={percentage}
           onCancel={() => setStatus("idle")}
-          onVerify={() => setStatus("verification")}
-          onSave={() => setStatus("form")}
+          onDetail={() => setStatus("detail")}
         />
       )}
 
       {status === "success" && (
         <SuccessModal onClose={() => setStatus("idle")} />
       )}
+
     </div>
   );
 }
