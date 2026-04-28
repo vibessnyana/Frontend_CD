@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import FilterPanel from "../features/metadata/FilterPanel.jsx";
-import MetadataList from "../features/metadata/MetadataList.jsx";
-import MetadataPreview from "../features/metadata/MetadataPreview.jsx";
-import MetadataForm from "../features/metadata/MetadataForm.jsx";
-import DeleteModal from "../features/metadata/DeleteModal.jsx";
-import SuccessModal from "../features/metadata/SuccessModal.jsx";
-import SearchBar from "../features/metadata/SearchBar.jsx";
-import ModalWrapper from "../features/metadata/ModalWrapper.jsx";
+import SidebarFilter from "../components/features/metadata/SidebarFilter.jsx";
+import ItemGrid from "../components/features/metadata/ItemGrid.jsx";
+import PreviewModal from "../components/features/metadata/PreviewModal.jsx";
+import MetadataEditor from "../components/features/metadata/MetadataEditor.jsx";
+import ConfirmDelete from "../components/features/metadata/ConfirmDelete.jsx";
+import SuccessPopup from "../components/features/metadata/SuccessPopup.jsx";
+import TopSearch from "../components/features/metadata/TopSearch.jsx";
+import BaseModal from "../components/features/metadata/BaseModal.jsx";
 
 import logo from "../assets/logo1.png";
 
@@ -17,7 +17,7 @@ export default function MetadataPages() {
   const [mode, setMode] = useState("idle");
 
   const navigate = useNavigate();
-  const location = useLocation(); // 🔥 buat active menu
+  const location = useLocation();
 
   const dummyData = [
     {
@@ -26,6 +26,13 @@ export default function MetadataPages() {
       Deskripsi:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       "Sub Kategori": "Ilustrasi Digital",
+    },
+    {
+      _id: "2",
+      "Judul KI": "Lorem ipsum dolor",
+      Deskripsi:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "Sub Kategori": "Desain Grafis",
     },
   ];
 
@@ -81,16 +88,16 @@ export default function MetadataPages() {
       <div className="flex gap-6 p-6">
 
         {/* LEFT FILTER */}
-        <FilterPanel />
+        <SidebarFilter />
 
         {/* RIGHT CONTENT */}
         <div className="flex-1">
 
           {/* SEARCH */}
-          <SearchBar onSearch={() => {}} />
+          <TopSearch onSearch={() => {}} />
 
-          {/* CARD LIST */}
-          <MetadataList
+          {/* GRID */}
+          <ItemGrid
             data={dummyData}
             onSelect={(item) => {
               setSelected(item);
@@ -101,43 +108,48 @@ export default function MetadataPages() {
         </div>
       </div>
 
-      {/* ================= PREVIEW MODAL ================= */}
+      {/* ================= PREVIEW ================= */}
       {mode === "preview" && (
-        <ModalWrapper>
-          <MetadataPreview
+        <BaseModal>
+          <PreviewModal
             data={selected}
             onEdit={() => setMode("edit")}
             onDelete={() => setMode("delete")}
           />
-        </ModalWrapper>
+        </BaseModal>
       )}
 
-      {/* ================= EDIT MODAL ================= */}
+      {/* ================= EDIT ================= */}
       {mode === "edit" && (
-        <ModalWrapper>
-          <MetadataForm
+        <BaseModal>
+          <MetadataEditor
             data={selected}
             onSave={() => setMode("success")}
             onCancel={() => setMode("preview")}
           />
-        </ModalWrapper>
+        </BaseModal>
       )}
 
       {/* ================= DELETE ================= */}
       {mode === "delete" && (
-        <DeleteModal
-          onCancel={() => setMode("preview")}
-          onConfirm={() => setMode("success")}
-        />
+        <BaseModal>
+          <ConfirmDelete
+            onCancel={() => setMode("preview")}
+            onConfirm={() => setMode("success")}
+          />
+        </BaseModal>
       )}
 
       {/* ================= SUCCESS ================= */}
       {mode === "success" && (
-        <SuccessModal
-          text="Update successful"
-          onClose={() => setMode("idle")}
-        />
+        <BaseModal>
+          <SuccessPopup
+            text="Update successful"
+            onClose={() => setMode("idle")}
+          />
+        </BaseModal>
       )}
+
     </div>
   );
 }
