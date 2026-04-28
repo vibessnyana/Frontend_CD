@@ -68,6 +68,7 @@ const ResultModal = ({ percentage, onCancel, onDetail }) => (
 
 /* ================= UPLOAD BOX ================= */
 const UploadBox = ({ preview, setFile, setPreview }) => {
+
   const handleFile = (f) => {
     if (!f.type.startsWith("image/")) {
       alert("Hanya file gambar!");
@@ -147,14 +148,13 @@ const DetailPage = ({ preview, onVerify, onCancel }) => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow w-[900px] flex gap-6">
+
       <div className="flex-1 flex items-center justify-center">
-        <img
-          src={preview}
-          className="max-h-[400px] object-contain rounded-lg"
-        />
+        <img src={preview} className="max-h-[400px] object-contain rounded-lg" />
       </div>
 
       <div className="flex-1 border-l pl-6">
+
         <h3 className="font-semibold mb-2">Top 3 Internal</h3>
         {internal.map((item, i) => (
           <SimilarityItem key={i} {...item} />
@@ -178,10 +178,43 @@ const DetailPage = ({ preview, onVerify, onCancel }) => {
             Verifikasi
           </Button>
         </div>
+
       </div>
     </div>
   );
 };
+
+/* ================= FORM ================= */
+const Form = ({ onSubmit, onCancel }) => (
+  <div className="bg-white p-6 rounded-xl shadow w-[700px] flex gap-6">
+    <img src="https://via.placeholder.com/300" />
+
+    <div className="flex-1">
+      <h3 className="mb-3 font-semibold">Form</h3>
+
+      <input className="w-full mb-2 p-2 border rounded" placeholder="_id" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="No" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="ki_id" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="ki_uuid" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Judul KI" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Deskripsi" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Kategori" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Sub Kategori" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Kategori HC" />
+      <input className="w-full mb-2 p-2 border rounded" placeholder="Sub Kategori HC" />
+
+      <div className="flex justify-end gap-3 mt-4">
+        <Button variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+
+        <Button variant="success" onClick={onSubmit}>
+          Save
+        </Button>
+      </div>
+    </div>
+  </div>
+);
 
 /* ================= SUCCESS ================= */
 const SuccessModal = ({ onClose }) => (
@@ -196,13 +229,13 @@ const SuccessModal = ({ onClose }) => (
 
 /* ================= MAIN ================= */
 export default function PlagiarismPages() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [status, setStatus] = useState("idle");
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [percentage, setPercentage] = useState(65);
-
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [percentage] = useState(65);
 
   useEffect(() => {
     return () => {
@@ -213,18 +246,22 @@ export default function PlagiarismPages() {
   return (
     <div className="w-full min-h-screen bg-gray-200 flex flex-col">
 
-      {/* ================= NAVBAR ================= */}
+      {/* 🔥 NAVBAR (FIXED — SAMA METADATA) */}
       <div className="w-full bg-red-600 h-[60px] flex items-center px-10 text-white">
 
         <div className="flex-1 flex items-center">
+          {/* 🔥 FIX DI SINI */}
           <img src={logo} className="h-10 object-contain" />
         </div>
 
         <div className="flex-1 flex justify-center gap-12 text-sm font-medium">
+
           <p
             onClick={() => navigate("/")}
             className={`cursor-pointer ${
-              location.pathname === "/" ? "underline font-semibold" : "hover:underline"
+              location.pathname === "/"
+                ? "underline font-semibold"
+                : "hover:underline"
             }`}
           >
             Cek plagiarisme
@@ -233,11 +270,14 @@ export default function PlagiarismPages() {
           <p
             onClick={() => navigate("/metadata")}
             className={`cursor-pointer ${
-              location.pathname === "/metadata" ? "underline font-semibold" : "hover:underline"
+              location.pathname === "/metadata"
+                ? "underline font-semibold"
+                : "hover:underline"
             }`}
           >
             Search metadata
           </p>
+
         </div>
 
         <div className="flex-1 flex justify-end">
@@ -249,24 +289,17 @@ export default function PlagiarismPages() {
 
       </div>
 
-      {/* ================= CONTENT ================= */}
+
+      {/* CONTENT */}
       <div className="flex-1 flex flex-col items-center justify-center gap-10">
 
         {status === "idle" && (
           <>
-            <UploadBox
-              preview={preview}
-              setFile={setFile}
-              setPreview={setPreview}
-            />
+            <UploadBox preview={preview} setFile={setFile} setPreview={setPreview} />
 
             <Button
               onClick={() => {
-                if (!file) {
-                  alert("Upload gambar dulu!");
-                  return;
-                }
-
+                if (!file) return alert("Upload gambar dulu!");
                 setStatus("loading");
 
                 setTimeout(() => {
@@ -283,6 +316,13 @@ export default function PlagiarismPages() {
           <DetailPage
             preview={preview}
             onVerify={() => setStatus("form")}
+            onCancel={() => setStatus("idle")}
+          />
+        )}
+
+        {status === "form" && (
+          <Form
+            onSubmit={() => setStatus("success")}
             onCancel={() => setStatus("idle")}
           />
         )}

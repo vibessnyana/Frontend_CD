@@ -1,23 +1,59 @@
-export default function SidebarFilter() {
+export default function SidebarFilter({
+  kategori = "",
+  setKategori = () => {},
+  subKategori = "",
+  setSubKategori = () => {},
+  kategoriList = [],
+  subKategoriList = [],
+}) {
   return (
-    <div className="bg-white p-4 rounded-xl shadow w-[250px]">
-      <h2 className="font-semibold mb-4">Filters</h2>
+    <div className="bg-white p-4 rounded-xl shadow">
 
-      <select className="border w-full mb-2 p-2">
-        <option>Jenis Karya</option>
-      </select>
+      <h2 className="text-base font-semibold mb-4">Filters</h2>
 
-      <select className="border w-full mb-2 p-2">
-        <option>Kategori</option>
-      </select>
+      <div className="space-y-3">
 
-      <select className="border w-full mb-4 p-2">
-        <option>Tahun</option>
-      </select>
+        {/* KATEGORI */}
+        <select
+          value={kategori}
+          onChange={(e) => {
+            setKategori(e.target.value);
+            setSubKategori("");
+          }}
+          className="w-full border px-3 py-2 rounded-md text-sm text-gray-600"
+        >
+          <option value="">Jenis Karya</option>
+          {kategoriList.map((k, i) => (
+            <option key={i} value={k}>{k}</option>
+          ))}
+        </select>
 
-      <button className="bg-red-500 text-white w-full py-2 rounded">
-        Apply Filter
-      </button>
+        {/* SUB KATEGORI */}
+        <select
+          value={subKategori}
+          onChange={(e) => setSubKategori(e.target.value)}
+          className="w-full border px-3 py-2 rounded-md text-sm text-gray-600"
+        >
+          <option value="">Kategori</option>
+          {subKategoriList.map((s, i) => (
+            <option key={i} value={s}>{s}</option>
+          ))}
+        </select>
+
+        {/* 🔥 RESET BUTTON (KECIL & WARNA) */}
+        <div className="flex justify-end pt-1">
+          <button
+            onClick={() => {
+              setKategori("");
+              setSubKategori("");
+            }}
+            className="px-3 py-1.5 text-xs bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          >
+            Reset
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 }

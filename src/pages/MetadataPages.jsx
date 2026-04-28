@@ -1,40 +1,81 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import logo from "../assets/logo1.png";
 
 import SidebarFilter from "../components/features/metadata/SidebarFilter.jsx";
 import ItemGrid from "../components/features/metadata/ItemGrid.jsx";
 import PreviewModal from "../components/features/metadata/PreviewModal.jsx";
-import MetadataEditor from "../components/features/metadata/MetadataEditor.jsx";
 import ConfirmDelete from "../components/features/metadata/ConfirmDelete.jsx";
-import SuccessPopup from "../components/features/metadata/SuccessPopup.jsx";
-import TopSearch from "../components/features/metadata/TopSearch.jsx";
+import MetadataEditor from "../components/features/metadata/MetadataEditor.jsx";
 import BaseModal from "../components/features/metadata/BaseModal.jsx";
 
-import logo from "../assets/logo1.png";
+import metadataData from "../data/metadata.json";
 
 export default function MetadataPages() {
-  const [selected, setSelected] = useState(null);
-  const [mode, setMode] = useState("idle");
-
   const navigate = useNavigate();
   const location = useLocation();
 
-  const dummyData = [
-    {
-      _id: "1",
-      "Judul KI": "Lorem ipsum risus",
-      Deskripsi:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "Sub Kategori": "Ilustrasi Digital",
-    },
-    {
-      _id: "2",
-      "Judul KI": "Lorem ipsum dolor",
-      Deskripsi:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "Sub Kategori": "Desain Grafis",
-    },
+  const [mode, setMode] = useState("idle");
+  const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const [kategori, setKategori] = useState("");
+  const [subKategori, setSubKategori] = useState("");
+
+  const [data, setData] = useState(metadataData);
+
+  // 🔥 PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // 🔥 FILTER LIST
+  const kategoriList = [...new Set(data.map((d) => d.Kategori))];
+
+  const subKategoriList = [
+    ...new Set(
+      data
+        .filter((d) => (kategori ? d.Kategori === kategori : true))
+        .map((d) => d["Sub Kategori"])
+    ),
   ];
+
+  // 🔍 FILTER + SEARCH
+  const filteredData = data.filter((item) => {
+    const matchSearch = Object.values(item)
+      .join(" ")
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchKategori = kategori
+      ? item.Kategori === kategori
+      : true;
+
+    const matchSub = subKategori
+      ? item["Sub Kategori"] === subKategori
+      : true;
+
+    return matchSearch && matchKategori && matchSub;
+  });
+
+  // 🔥 RESET PAGE SAAT FILTER
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, kategori, subKategori]);
+
+  // 🔥 PAGINATION LOGIC
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // DELETE
+  const handleDelete = () => {
+    setData(data.filter((item) => item._id !== selected._id));
+    setMode("idle");
+  };
 
   return (
     <div className="w-full min-h-screen bg-gray-200 flex flex-col">
@@ -42,110 +83,200 @@ export default function MetadataPages() {
       {/* ================= NAVBAR ================= */}
       <div className="w-full bg-red-600 h-[60px] flex items-center px-10 text-white">
 
-        {/* LOGO */}
         <div className="flex-1 flex items-center">
           <img src={logo} className="h-10 object-contain" />
         </div>
 
-        {/* MENU */}
         <div className="flex-1 flex justify-center gap-12 text-sm font-medium">
-
-          <p
-            onClick={() => navigate("/")}
-            className={`cursor-pointer transition ${
-              location.pathname === "/"
-                ? "underline font-semibold"
-                : "hover:underline"
-            }`}
-          >
-            Cek plagiarisme
-          </p>
-
-          <p
-            onClick={() => navigate("/metadata")}
-            className={`cursor-pointer transition ${
-              location.pathname === "/metadata"
-                ? "underline font-semibold"
-                : "hover:underline"
-            }`}
-          >
-            Search metadata
-          </p>
-
+          <p onClick={() => navigate("/")}>Cek plagiarisme</p>
+          <p className="underline">Search metadata</p>
         </div>
 
-        {/* PROFILE */}
         <div className="flex-1 flex justify-end">
           <div className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg">
             <div className="w-7 h-7 bg-gray-300 rounded-full"></div>
-            <span className="text-sm">John Doe</span>
+            <span className="text-sm">Bandung Techno Park</span>
           </div>
         </div>
 
       </div>
 
       {/* ================= CONTENT ================= */}
-      <div className="flex gap-6 p-6">
+      <div className="flex gap-4 px-6 pt-3 pb-6">
 
-        {/* LEFT FILTER */}
-        <SidebarFilter />
+        {/* FILTER */}
+        <div className="w-[200px]">
+          <SidebarFilter
+            kategori={kategori}
+            setKategori={setKategori}
+            subKategori={subKategori}
+            setSubKategori={setSubKategori}
+            kategoriList={kategoriList}
+            subKategoriList={subKategoriList}
+          />
+        </div>
 
-        {/* RIGHT CONTENT */}
+        {/* RIGHT */}
         <div className="flex-1">
 
-          {/* SEARCH */}
-          <TopSearch onSearch={() => {}} />
+          {/* 🔥 SEARCH BAR (FIX ICON) */}
+          <div className="flex mb-4">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search for Metadata Property"
+              className="flex-1 px-4 py-2 border rounded-l-lg text-sm outline-none bg-white"
+            />
+
+            <button className="bg-red-600 px-4 rounded-r-lg flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+          </div>
 
           {/* GRID */}
           <ItemGrid
-            data={dummyData}
+            data={currentData}
             onSelect={(item) => {
               setSelected(item);
               setMode("preview");
             }}
           />
 
+          {/* ================= PAGINATION ================= */}
+          <div className="flex justify-center mt-6 items-center gap-2 text-sm">
+
+            {/* PREV */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded border ${
+                currentPage === 1
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              {"<"}
+            </button>
+
+            {/* PAGE NUMBERS */}
+            {(() => {
+              const pages = [];
+              const maxVisible = 5;
+
+              let start = Math.max(currentPage - 2, 1);
+              let end = Math.min(start + maxVisible - 1, totalPages);
+
+              if (end - start < maxVisible - 1) {
+                start = Math.max(end - maxVisible + 1, 1);
+              }
+
+              if (start > 1) {
+                pages.push(
+                  <button
+                    key={1}
+                    onClick={() => setCurrentPage(1)}
+                    className="px-3 py-1 border rounded bg-white"
+                  >
+                    1
+                  </button>
+                );
+
+                if (start > 2) pages.push(<span key="s">...</span>);
+              }
+
+              for (let i = start; i <= end; i++) {
+                pages.push(
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i)}
+                    className={`px-3 py-1 rounded ${
+                      currentPage === i
+                        ? "bg-red-600 text-white"
+                        : "bg-white border hover:bg-gray-100"
+                    }`}
+                  >
+                    {i}
+                  </button>
+                );
+              }
+
+              if (end < totalPages) {
+                if (end < totalPages - 1) pages.push(<span key="e">...</span>);
+
+                pages.push(
+                  <button
+                    key={totalPages}
+                    onClick={() => setCurrentPage(totalPages)}
+                    className="px-3 py-1 border rounded bg-white"
+                  >
+                    {totalPages}
+                  </button>
+                );
+              }
+
+              return pages;
+            })()}
+
+            {/* NEXT */}
+            <button
+              onClick={() =>
+                setCurrentPage((p) => Math.min(p + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded border ${
+                currentPage === totalPages
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              {">"}
+            </button>
+
+          </div>
+
         </div>
       </div>
 
-      {/* ================= PREVIEW ================= */}
+      {/* ================= MODALS ================= */}
       {mode === "preview" && (
-        <BaseModal>
+        <BaseModal onClose={() => setMode("idle")}>
           <PreviewModal
             data={selected}
-            onEdit={() => setMode("edit")}
             onDelete={() => setMode("delete")}
+            onEdit={() => setMode("edit")}
+            onClose={() => setMode("idle")}
           />
         </BaseModal>
       )}
 
-      {/* ================= EDIT ================= */}
+      {mode === "delete" && (
+        <BaseModal onClose={() => setMode("idle")}>
+          <ConfirmDelete
+            onConfirm={handleDelete}
+            onCancel={() => setMode("preview")}
+          />
+        </BaseModal>
+      )}
+
       {mode === "edit" && (
-        <BaseModal>
+        <BaseModal onClose={() => setMode("idle")}>
           <MetadataEditor
             data={selected}
-            onSave={() => setMode("success")}
             onCancel={() => setMode("preview")}
-          />
-        </BaseModal>
-      )}
-
-      {/* ================= DELETE ================= */}
-      {mode === "delete" && (
-        <BaseModal>
-          <ConfirmDelete
-            onCancel={() => setMode("preview")}
-            onConfirm={() => setMode("success")}
-          />
-        </BaseModal>
-      )}
-
-      {/* ================= SUCCESS ================= */}
-      {mode === "success" && (
-        <BaseModal>
-          <SuccessPopup
-            text="Update successful"
-            onClose={() => setMode("idle")}
+            onSave={() => setMode("idle")}
           />
         </BaseModal>
       )}
