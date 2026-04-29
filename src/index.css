@@ -111,3 +111,18 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ================= FORM STYLE ================= */
+
+@layer components {
+  .input {
+    @apply w-full p-2 border border-gray-300 rounded-md text-sm bg-white 
+    focus:outline-none focus:ring-2 focus:ring-red-500;
+  }
+
+  .textarea {
+    @apply w-full p-2 border border-gray-300 rounded-md text-sm bg-white 
+    resize-none h-20 
+    focus:outline-none focus:ring-2 focus:ring-red-500;
+  }
+}

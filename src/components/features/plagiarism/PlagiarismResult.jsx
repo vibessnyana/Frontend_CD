@@ -1,52 +1,38 @@
-import Button from "../../ui/Button";
-import Card from "../../ui/Card";
+import Modal from "../../ui/Modal.jsx";
+import Button from "../../ui/Button.jsx";
 
-const PlagiarismResult = ({
-  percentage,
+export default function PlagiarismResult({
+  resultPercent,
   onCancel,
-  onVerify,
-  onSave,
-}) => {
-  const isLow = percentage <= 30;
-  const isMedium = percentage > 30 && percentage <= 70;
-
+  onDetail,
+}) {
   return (
-    <div className="flex justify-center items-center h-[70vh]">
-      
-      <Card>
-        <div className="text-center">
+    <Modal>
+      <div className="flex flex-col items-center text-center">
 
-          <h1 className="text-4xl font-bold mb-2">
-            {percentage}%
-          </h1>
+        <h1 className="text-5xl font-bold text-yellow-500 mb-2">
+          {resultPercent}%
+        </h1>
 
-          <p className="text-gray-500 mb-6">
-            Plagiarisme terdeteksi
-          </p>
+        <p className="text-gray-600 mb-1">
+          Tingkat Kemiripan Terdeteksi
+        </p>
 
-          <div className="flex gap-3 justify-center">
-            <Button variant="secondary" onClick={onCancel}>
-              Cancel
-            </Button>
+        <p className="text-xs text-gray-400 mb-6">
+          Klik "Lihat Detail" untuk melihat kemiripan
+        </p>
 
-            {isLow && (
-              <Button onClick={onSave}>
-                Save
-              </Button>
-            )}
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
 
-            {isMedium && (
-              <Button onClick={onVerify}>
-                Verifikasi
-              </Button>
-            )}
-          </div>
-
+          <Button variant="success" onClick={onDetail}>
+            Lihat Detail
+          </Button>
         </div>
-      </Card>
 
-    </div>
+      </div>
+    </Modal>
   );
-};
-
-export default PlagiarismResult;
+}

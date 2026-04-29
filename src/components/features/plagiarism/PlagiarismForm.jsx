@@ -1,52 +1,49 @@
-import { useState } from "react";
-import Button from "../../ui/Button";
-import Input from "../../ui/Input";
-import Card from "../../ui/Card";
-import FormField from "../../common/FormField";
+import Button from "../../ui/Button.jsx";
 
-const PlagiarismForm = ({ onSubmit, onCancel }) => {
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-
+export default function PlagiarismForm({
+  onSubmit,
+  onCancel,
+}) {
   return (
-    <div className="flex justify-center items-center h-[70vh]">
+    <div className="w-full flex justify-center items-center">
 
-      <Card>
-        <div className="w-[400px]">
+      <div className="bg-white p-6 rounded-xl shadow w-full max-w-[600px]">
 
-          <h2 className="text-xl font-semibold mb-4">
-            Input Data
-          </h2>
+        {/* TITLE */}
+        <h3 className="mb-4 font-semibold text-lg text-center">
+          Form
+        </h3>
 
-          <FormField label="Judul">
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </FormField>
+        {/* FORM CONTENT */}
+        <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2">
 
-          <FormField label="Deskripsi">
-            <Input
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-            />
-          </FormField>
+          <input className="input" placeholder="_id" />
+          <input className="input" placeholder="No" />
+          <input className="input" placeholder="ki_id" />
+          <input className="input" placeholder="ki_uuid" />
 
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="secondary" onClick={onCancel}>
-              Cancel
-            </Button>
+          <textarea className="textarea" placeholder="Judul KI" />
+          <textarea className="textarea" placeholder="Deskripsi" />
 
-            <Button onClick={onSubmit}>
-              Save
-            </Button>
-          </div>
+          <input className="input" placeholder="Kategori" />
+          <input className="input" placeholder="Sub Kategori" />
+          <input className="input" placeholder="Kategori HC" />
+          <input className="input" placeholder="Sub Kategori HC" />
 
         </div>
-      </Card>
 
+        {/* BUTTON */}
+        <div className="flex justify-end gap-3 mt-4">
+          <Button variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+
+          <Button variant="success" onClick={onSubmit}>
+            Save
+          </Button>
+        </div>
+
+      </div>
     </div>
   );
-};
-
-export default PlagiarismForm;
+}
