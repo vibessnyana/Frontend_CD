@@ -1,5 +1,5 @@
 import Button from "../../ui/Button.jsx";
-import SimilarityItem from "./SimilarityItem.jsx";
+import SimilarityList from "./SimilarityList.jsx";
 
 export default function PlagiarismVerification({
   preview,
@@ -8,8 +8,10 @@ export default function PlagiarismVerification({
   onVerify,
   onCancel,
 }) {
+  // 🔥 biar gak nulis berulang
   const isAllowed = resultPercent <= threshold;
 
+  // 🔥 dummy data (nanti bisa dari backend)
   const internal = [
     { img: "https://via.placeholder.com/100", percent: 92 },
     { img: "https://via.placeholder.com/100", percent: 87 },
@@ -36,18 +38,16 @@ export default function PlagiarismVerification({
       {/* RIGHT */}
       <div className="flex-1 border-l pl-6">
 
-        <h3 className="font-semibold mb-2">Top 3 Internal</h3>
-        {internal.map((item, i) => (
-          <SimilarityItem key={i} {...item} />
-        ))}
+        {/* 🔥 INTERNAL LIST */}
+        <SimilarityList title="Top 3 Internal" data={internal} />
 
-        <h3 className="font-semibold mt-4 mb-2">Top 3 External</h3>
-        {external.map((item, i) => (
-          <SimilarityItem key={i} {...item} />
-        ))}
+        {/* 🔥 EXTERNAL LIST */}
+        <div className="mt-4">
+          <SimilarityList title="Top 3 External" data={external} />
+        </div>
 
         {/* TEXT */}
-        {resultPercent <= threshold ? (
+        {isAllowed ? (
           <p className="text-xs text-gray-500 mt-4">
             Klik "Verifikasi" untuk melanjutkan proses penyimpanan metadata karya.
           </p>
@@ -63,7 +63,7 @@ export default function PlagiarismVerification({
             Cancel
           </Button>
 
-          {resultPercent <= threshold && (
+          {isAllowed && (
             <Button variant="success" onClick={onVerify}>
               Verifikasi
             </Button>

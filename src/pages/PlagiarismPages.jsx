@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import logo from "../assets/logo1.png";
 import Button from "../components/ui/Button.jsx";
 
@@ -12,48 +10,33 @@ import PlagiarismSettingModal from "../components/features/plagiarism/Plagiarism
 import LoadingModal from "../components/features/plagiarism/LoadingModal.jsx";
 import SuccessModal from "../components/features/plagiarism/SuccessModal.jsx";
 
+import usePlagiarism from "../hooks/usePlagiarism";
+import { STATUS } from "../constants/plagiarismStatus";
+
 export default function PlagiarismPages() {
   const navigate = useNavigate();
 
-  const [status, setStatus] = useState("idle");
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-
-  const [threshold, setThreshold] = useState(65);
-  const [resultPercent, setResultPercent] = useState(65);
-
-  useEffect(() => {
-    return () => {
-      if (preview) URL.revokeObjectURL(preview);
-    };
-  }, [preview]);
+  const {
+    status,
+    setStatus,
+    file,
+    setFile,
+    preview,
+    setPreview,
+    threshold,
+    setThreshold,
+    resultPercent,
+    startCheck,
+  } = usePlagiarism();
 
   return (
     <div className="w-full min-h-screen bg-gray-200 flex flex-col">
 
-      {/* NAVBAR */}
-      <div className="w-full bg-red-600 h-[60px] flex items-center px-10 text-white">
-        <div className="flex-1 flex items-center">
-          <img src={logo} className="h-10" />
-        </div>
-
-        <div className="flex-1 flex justify-center gap-12 text-sm">
-          <p onClick={() => navigate("/")}>Cek plagiarisme</p>
-          <p onClick={() => navigate("/metadata")}>Search metadata</p>
-        </div>
-
-        <div className="flex-1 flex justify-end">
-          <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
-            <div className="w-7 h-7 bg-gray-300 rounded-full"></div>
-            Bandung Techno Park
-          </div>
-        </div>
-      </div>
 
       {/* CONTENT */}
       <div className="flex-1 flex flex-col items-center justify-center gap-10">
 
-        {status === "idle" && (
+        {status === STATUS.IDLE && (
           <>
             <PlagiarismUpload
               preview={preview}
@@ -61,64 +44,58 @@ export default function PlagiarismPages() {
               setPreview={setPreview}
             />
 
-            <Button onClick={() => {
-              if (!file) return alert("Upload gambar dulu!");
-              setStatus("setting");
-            }}>
+            <Button
+              onClick={() => {
+                if (!file) return alert("Upload gambar dulu!");
+                setStatus(STATUS.SETTING);
+              }}
+            >
               Upload Gambar
             </Button>
           </>
         )}
 
-        {status === "detail" && (
+        {status === STATUS.DETAIL && (
           <PlagiarismVerification
             preview={preview}
             resultPercent={resultPercent}
             threshold={threshold}
-            onVerify={() => setStatus("form")}
-            onCancel={() => setStatus("idle")}
+            onVerify={() => setStatus(STATUS.FORM)}
+            onCancel={() => setStatus(STATUS.IDLE)}
           />
         )}
 
-        {status === "form" && (
+        {status === STATUS.FORM && (
           <PlagiarismForm
-            onSubmit={() => setStatus("success")}
-            onCancel={() => setStatus("idle")}
+            onSubmit={() => setStatus(STATUS.SUCCESS)}
+            onCancel={() => setStatus(STATUS.IDLE)}
           />
         )}
-
       </div>
 
       {/* MODALS */}
-
-      {status === "setting" && (
+      {status === STATUS.SETTING && (
         <PlagiarismSettingModal
           preview={preview}
           threshold={threshold}
           setThreshold={setThreshold}
-          onCancel={() => setStatus("idle")}
-          onCheck={() => {
-            setStatus("loading");
-            setTimeout(() => {
-              setResultPercent(65); // default hasil deteksi
-              setStatus("result");
-            }, 1000);
-          }}
+          onCancel={() => setStatus(STATUS.IDLE)}
+          onCheck={startCheck}
         />
       )}
 
-      {status === "loading" && <LoadingModal />}
+      {status === STATUS.LOADING && <LoadingModal />}
 
-      {status === "result" && (
+      {status === STATUS.RESULT && (
         <PlagiarismResult
           resultPercent={resultPercent}
-          onCancel={() => setStatus("idle")}
-          onDetail={() => setStatus("detail")}
+          onCancel={() => setStatus(STATUS.IDLE)}
+          onDetail={() => setStatus(STATUS.DETAIL)}
         />
       )}
 
-      {status === "success" && (
-        <SuccessModal onClose={() => setStatus("idle")} />
+      {status === STATUS.SUCCESS && (
+        <SuccessModal onClose={() => setStatus(STATUS.IDLE)} />
       )}
 
     </div>
