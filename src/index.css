@@ -115,14 +115,25 @@ code {
 /* ================= FORM STYLE ================= */
 
 @layer components {
-  .input {
-    @apply w-full p-2 border border-gray-300 rounded-md text-sm bg-white 
-    focus:outline-none focus:ring-2 focus:ring-red-500;
+
+  .label {
+    @apply text-xs text-gray-500 mb-1 block;
   }
 
-  .textarea {
-    @apply w-full p-2 border border-gray-300 rounded-md text-sm bg-white 
-    resize-none h-20 
-    focus:outline-none focus:ring-2 focus:ring-red-500;
+  .input-compact {
+    @apply w-full px-3 py-2 text-sm rounded-lg
+    border border-gray-300 bg-gray-100
+    shadow-inner
+    focus:outline-none focus:border-red-500;
   }
+
+  .textarea-compact {
+    @apply w-full px-3 py-2 text-sm rounded-lg
+    border border-gray-300 bg-gray-100
+    shadow-inner
+    min-h-[90px] resize-none
+    whitespace-pre-wrap break-words
+    focus:outline-none focus:border-red-500;
+  }
+
 }

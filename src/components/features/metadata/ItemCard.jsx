@@ -1,32 +1,31 @@
-export default function ItemCard({ data, onClick }) {
-  if (!data) return null;
+export default function ItemCard({ item, onSelect }) {
+  if (!item) return null;
 
   return (
     <div
-      onClick={onClick}
-      className="bg-white rounded-xl shadow-sm p-3 cursor-pointer hover:shadow-md transition"
+      onClick={() => onSelect(item)} // 🔥 HARUS onSelect
+      className="bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition"
     >
-      {/* IMAGE */}
-      <div className="h-[110px] bg-gray-200 rounded-md mb-2"></div>
 
-      {/* TITLE */}
-      <h3 className="font-semibold text-gray-800 text-sm leading-tight">
-        {data["Judul KI"]}
+      <div className="h-[120px] bg-gray-200 rounded-md mb-3"></div>
+
+      <h3 className="font-semibold text-sm mb-1 line-clamp-1">
+        {item["Judul KI"]}
       </h3>
 
-      {/* DESC */}
-      <p className="text-xs text-gray-500 mb-1 line-clamp-2">
-        {data.Deskripsi}
+      <p className="text-xs text-gray-500 mb-2 line-clamp-1">
+        {item.Deskripsi}
       </p>
 
-      {/* CATEGORY */}
-      <p className="text-xs text-gray-600">
-        <b>Kategori:</b> {data.Kategori}
+      <p className="text-xs">
+        <span className="font-semibold">Kategori:</span> {item.Kategori}
       </p>
 
-      <p className="text-xs text-gray-600">
-        <b>Sub:</b> {data["Sub Kategori"]}
+      <p className="text-xs">
+        <span className="font-semibold">Sub:</span>{" "}
+        {item["Sub Kategori"]}
       </p>
+
     </div>
   );
 }

@@ -1,6 +1,3 @@
-import Modal from "../../ui/Modal.jsx";
-import Button from "../../ui/Button.jsx";
-
 export default function PlagiarismSettingModal({
   preview,
   threshold,
@@ -9,39 +6,64 @@ export default function PlagiarismSettingModal({
   onCheck,
 }) {
   return (
-    <Modal>
-      <div className="flex flex-col items-center gap-4">
+    <div className="fixed inset-0 flex items-start justify-center pt-24 z-50">
+      {/* ⬆️ pt-24 = jarak dari atas (biar gak nempel navbar) */}
 
-        <img src={preview} className="w-[200px] rounded-md" />
+      <div className="bg-white w-[380px] rounded-2xl shadow-xl p-5 relative">
+        {/* ⬆️ width diperkecil dari 420 → 380 */}
+        {/* ⬆️ padding diperkecil */}
 
-        <div className="w-full">
-          <label className="text-sm font-medium">
-            Batas Maksimum Kemiripan (%)
-          </label>
+        {/* CLOSE */}
+        <button
+          onClick={onCancel}
+          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-sm"
+        >
+          ✕
+        </button>
 
-          <p className="text-xs text-gray-500 mb-2">
-            Jika hasil melebihi nilai ini, karya tidak dapat diverifikasi.
-          </p>
+        {/* IMAGE */}
+        <img
+          src={preview}
+          className="w-full h-32 object-cover rounded-lg mb-3"
+        />
+        {/* ⬆️ tinggi gambar diperkecil */}
 
-          <input
-            type="number"
-            value={threshold}
-            onChange={(e) => setThreshold(Number(e.target.value))}
-            className="input"
-          />
-        </div>
+        {/* TITLE */}
+        <h2 className="text-base font-semibold text-gray-700 mb-1">
+          Batas Maksimum Kemiripan (%)
+        </h2>
 
-        <div className="flex gap-3">
-          <Button variant="secondary" onClick={onCancel}>
+        <p className="text-xs text-gray-400 mb-3">
+          Jika hasil melebihi nilai ini, karya tidak dapat diverifikasi.
+        </p>
+
+        {/* INPUT */}
+        <input
+          type="number"
+          value={threshold}
+          onChange={(e) => setThreshold(e.target.value)}
+          className="w-full border rounded-lg px-3 py-2 text-sm mb-4"
+        />
+
+        {/* BUTTON */}
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-300 text-sm rounded-lg 
+                       hover:bg-red-500 hover:text-white transition duration-200"
+          >
             Cancel
-          </Button>
+          </button>
 
-          <Button variant="success" onClick={onCheck}>
+          <button
+            onClick={onCheck}
+            className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg 
+                       hover:bg-green-700 transition duration-200"
+          >
             Cek Plagiarisme
-          </Button>
+          </button>
         </div>
-
       </div>
-    </Modal>
+    </div>
   );
 }

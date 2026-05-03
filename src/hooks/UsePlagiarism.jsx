@@ -1,41 +1,70 @@
 import { useState, useEffect } from "react";
-import { STATUS } from "../constants/plagiarismStatus";
 
 export default function usePlagiarism() {
-  const [status, setStatus] = useState(STATUS.IDLE);
+  // ======================
+  // STATE (SAMA PERSIS)
+  // ======================
+  const [status, setStatus] = useState("idle");
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
   const [threshold, setThreshold] = useState(65);
   const [resultPercent, setResultPercent] = useState(65);
 
-  // cleanup preview
+  // ======================
+  // CLEANUP
+  // ======================
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
-  // simulasi cek plagiarisme
-  const startCheck = () => {
-    setStatus(STATUS.LOADING);
+  // ======================
+  // ACTIONS (FLOW SAMA)
+  // ======================
+
+  const handleUploadClick = () => {
+    if (!file) {
+      alert("Upload gambar dulu!");
+      return;
+    }
+    setStatus("setting");
+  };
+
+  const handleCheck = () => {
+    setStatus("loading");
 
     setTimeout(() => {
-      setResultPercent(65);
-      setStatus(STATUS.RESULT);
+      setResultPercent(65); // 🔥 tetap 65
+      setStatus("result");
     }, 1000);
   };
 
+  const handleToDetail = () => setStatus("detail");
+  const handleToForm = () => setStatus("form");
+  const handleToSuccess = () => setStatus("success");
+  const handleReset = () => setStatus("idle");
+
+  // ======================
+  // RETURN
+  // ======================
   return {
     status,
-    setStatus,
     file,
-    setFile,
     preview,
-    setPreview,
     threshold,
-    setThreshold,
     resultPercent,
-    startCheck,
+
+    setFile,
+    setPreview,
+    setThreshold,
+
+    handleUploadClick,
+    handleCheck,
+    handleToDetail,
+    handleToForm,
+    handleToSuccess,
+    handleReset,
   };
 }
