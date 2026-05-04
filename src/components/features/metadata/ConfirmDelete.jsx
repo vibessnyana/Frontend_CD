@@ -1,3 +1,5 @@
+import Button from "../../ui/Button.jsx";
+
 export default function ConfirmDelete({ onConfirm, onCancel }) {
   return (
     <div className="bg-white w-[400px] rounded-2xl shadow-xl p-6 text-center">
@@ -8,27 +10,19 @@ export default function ConfirmDelete({ onConfirm, onCancel }) {
 
       <div className="flex justify-center gap-4">
 
-        {/* CANCEL */}
-        <button
+        <Button
           onClick={onCancel}
-          className="px-5 py-2 rounded-md text-sm 
-                     bg-gray-100 text-gray-700 
-                     hover:bg-red-500 hover:text-white 
-                     transition"
+          variant="secondary"
         >
           Cancel
-        </button>
+        </Button>
 
-        {/* YES */}
-        <button
+        <Button
           onClick={onConfirm}
-          className="px-5 py-2 rounded-md text-sm 
-                     bg-blue-500 text-white 
-                     hover:bg-blue-600 
-                     transition"
+          variant="primary"
         >
           Yes
-        </button>
+        </Button>
 
       </div>
     </div>

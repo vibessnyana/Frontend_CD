@@ -1,64 +1,166 @@
+import { useState } from "react";
+
 export default function PlagiarismSettingModal({
   preview,
-  threshold,
-  setThreshold,
   onCancel,
   onCheck,
 }) {
+  const [preset, setPreset] = useState("");
+  const [manual, setManual] = useState({
+    high: "",
+    medium: "",
+    low: "",
+  });
+
+  const presets = {
+    strict: { high: 90, medium: 75, low: 60 },
+    balanced: { high: 85, medium: 70, low: 55 },
+    sensitive: { high: 80, medium: 65, low: 50 },
+  };
+
+  const handleSubmit = () => {
+    if (preset) {
+      onCheck({ type: "preset", value: presets[preset] });
+      return;
+    }
+
+    if (manual.medium !== "") {
+      onCheck({ type: "manual", value: manual });
+      return;
+    }
+
+    alert("Pilih preset atau isi manual dulu!");
+  };
+
   return (
-    <div className="fixed inset-0 flex items-start justify-center pt-24 z-50">
-      {/* ⬆️ pt-24 = jarak dari atas (biar gak nempel navbar) */}
+    <div className="fixed inset-0 z-50 flex justify-center items-start pt-[80px]">
+      
+      {/* OVERLAY */}
+      <div className="absolute inset-0 bg-black/30" />
 
-      <div className="bg-white w-[380px] rounded-2xl shadow-xl p-5 relative">
-        {/* ⬆️ width diperkecil dari 420 → 380 */}
-        {/* ⬆️ padding diperkecil */}
+      {/* MODAL */}
+      <div className="relative bg-white w-[440px] rounded-2xl shadow-xl flex flex-col max-h-[80vh]">
 
-        {/* CLOSE */}
-        <button
-          onClick={onCancel}
-          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-sm"
-        >
-          ✕
-        </button>
+        {/* 🔥 SCROLL AREA */}
+        <div className="overflow-y-auto p-6">
 
-        {/* IMAGE */}
-        <img
-          src={preview}
-          className="w-full h-32 object-cover rounded-lg mb-3"
-        />
-        {/* ⬆️ tinggi gambar diperkecil */}
-
-        {/* TITLE */}
-        <h2 className="text-base font-semibold text-gray-700 mb-1">
-          Batas Maksimum Kemiripan (%)
-        </h2>
-
-        <p className="text-xs text-gray-400 mb-3">
-          Jika hasil melebihi nilai ini, karya tidak dapat diverifikasi.
-        </p>
-
-        {/* INPUT */}
-        <input
-          type="number"
-          value={threshold}
-          onChange={(e) => setThreshold(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 text-sm mb-4"
-        />
-
-        {/* BUTTON */}
-        <div className="flex justify-end gap-2">
+          {/* CLOSE */}
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-300 text-sm rounded-lg 
-                       hover:bg-red-500 hover:text-white transition duration-200"
+            className="absolute top-3 right-4 text-gray-400 hover:text-red-500"
+          >
+            ✕
+          </button>
+
+          {/* IMAGE */}
+          {preview && (
+            <img
+              src={preview}
+              className="w-full h-[140px] object-cover rounded-lg mb-4"
+            />
+          )}
+
+          {/* TITLE */}
+          <h2 className="text-lg font-semibold text-gray-800 mb-1">
+            Batas Maksimum Kemiripan (%)
+          </h2>
+
+          {/* DESC */}
+          <p className="text-xs text-gray-500 leading-relaxed mb-5">
+            Jika hasil melebihi nilai ini, karya tidak dapat diverifikasi.
+            <br />
+            Anda dapat memilih <span className="font-medium">preset otomatis</span> atau
+            mengatur nilai secara <span className="font-medium">manual</span>.
+            <br />
+            <span className="text-xs text-gray-400">
+              (Cukup pilih salah satu saja)
+            </span>
+          </p>
+
+          {/* PRESET */}
+          <div className="mb-4">
+            <label className="text-sm font-medium text-gray-700 block mb-1">
+              Preset
+            </label>
+
+            <select
+              value={preset}
+              onChange={(e) => {
+                setPreset(e.target.value);
+                setManual({ high: "", medium: "", low: "" });
+              }}
+              className="w-full border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="">Pilih preset...</option>
+              <option value="strict">Strict</option>
+              <option value="balanced">Balanced</option>
+              <option value="sensitive">Sensitive</option>
+            </select>
+
+            {preset && (
+              <p className="text-xs text-gray-400 mt-2">
+                High: {presets[preset].high}% • Medium:{" "}
+                {presets[preset].medium}% • Low: {presets[preset].low}%
+              </p>
+            )}
+          </div>
+
+          {/* MANUAL */}
+          <div className="mb-6">
+            <label className="text-sm font-medium text-gray-700 block mb-2">
+              Manual
+            </label>
+
+            <div className="grid grid-cols-3 gap-3">
+              <input
+                type="number"
+                placeholder="High"
+                value={manual.high}
+                onChange={(e) => {
+                  setManual({ ...manual, high: e.target.value });
+                  setPreset("");
+                }}
+                className="border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+
+              <input
+                type="number"
+                placeholder="Medium"
+                value={manual.medium}
+                onChange={(e) => {
+                  setManual({ ...manual, medium: e.target.value });
+                  setPreset("");
+                }}
+                className="border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+
+              <input
+                type="number"
+                placeholder="Low"
+                value={manual.low}
+                onChange={(e) => {
+                  setManual({ ...manual, low: e.target.value });
+                  setPreset("");
+                }}
+                className="border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 🔥 FIXED BUTTON (TIDAK IKUT SCROLL) */}
+        <div className="border-t p-4 flex justify-end gap-3 bg-white rounded-b-2xl">
+
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-300 rounded-md text-sm hover:bg-red-500 hover:text-white transition"
           >
             Cancel
           </button>
 
           <button
-            onClick={onCheck}
-            className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg 
-                       hover:bg-green-700 transition duration-200"
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
           >
             Cek Plagiarisme
           </button>

@@ -1,25 +1,20 @@
 export default function BaseModal({ children, onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-
-      {/* OVERLAY */}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+    >
+      
+      {/* 🔥 BACKGROUND OVERLAY + BLUR */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
       ></div>
 
-      {/* MODAL */}
-      <div className="relative z-10 flex items-center justify-center w-full h-full">
-
-        {/* CONTENT (NO SCROLL HERE ❌) */}
-        <div
-          className="bg-transparent"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {children}
-        </div>
-
+      {/* MODAL CONTENT */}
+      <div className="relative z-10">
+        {children}
       </div>
+
     </div>
   );
 }

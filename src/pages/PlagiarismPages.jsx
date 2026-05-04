@@ -14,7 +14,9 @@ export default function PlagiarismPages() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
+  // 🔥 ini sekarang MEDIUM threshold
   const [threshold, setThreshold] = useState(65);
+
   const [resultPercent, setResultPercent] = useState(65);
 
   useEffect(() => {
@@ -23,7 +25,6 @@ export default function PlagiarismPages() {
     };
   }, [preview]);
 
-  // modal yang bikin blur
   const isModalOpen =
     status === "setting" ||
     status === "loading" ||
@@ -33,7 +34,6 @@ export default function PlagiarismPages() {
   return (
     <div className="w-full min-h-screen bg-gray-200 flex flex-col">
 
-      {/* ================= CONTENT ================= */}
       <div
         className={`
           flex-1 flex flex-col items-center
@@ -42,7 +42,7 @@ export default function PlagiarismPages() {
         `}
       >
 
-        {/* ================= IDLE ================= */}
+        {/* IDLE */}
         {status === "idle" && (
           <>
             <PlagiarismUpload
@@ -52,6 +52,7 @@ export default function PlagiarismPages() {
             />
 
             <Button
+              variant="danger"
               onClick={() => {
                 if (!file) return alert("Upload gambar dulu!");
                 setStatus("setting");
@@ -62,7 +63,7 @@ export default function PlagiarismPages() {
           </>
         )}
 
-        {/* ================= DETAIL ================= */}
+        {/* DETAIL */}
         {status === "detail" && (
           <PlagiarismVerification
             preview={preview}
@@ -73,7 +74,7 @@ export default function PlagiarismPages() {
           />
         )}
 
-        {/* ================= FORM ================= */}
+        {/* FORM */}
         {status === "form" && (
           <PlagiarismForm
             onSubmit={() => setStatus("success")}
@@ -82,20 +83,31 @@ export default function PlagiarismPages() {
         )}
       </div>
 
-      {/* ================= OVERLAY ================= */}
+      {/* OVERLAY */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/30 z-40"></div>
       )}
 
-      {/* ================= MODALS ================= */}
+      {/* MODAL SETTING */}
       {status === "setting" && (
         <PlagiarismSettingModal
           preview={preview}
-          threshold={threshold}
-          setThreshold={setThreshold}
           onCancel={() => setStatus("idle")}
-          onCheck={() => {
+          onCheck={(data) => {
+            let mediumValue = 0;
+
+            if (data.type === "preset") {
+              mediumValue = data.value.medium;
+            } else {
+              mediumValue = parseFloat(data.value.medium || 0);
+            }
+
+            console.log("MEDIUM THRESHOLD:", mediumValue);
+
+            setThreshold(mediumValue);
+
             setStatus("loading");
+
             setTimeout(() => {
               setResultPercent(65);
               setStatus("result");

@@ -4,14 +4,20 @@ import SimilarityList from "./SimilarityList.jsx";
 export default function PlagiarismVerification({
   preview,
   resultPercent,
-  threshold,
+  threshold, // 🔥 ini = MEDIUM threshold dari setting
   onVerify,
   onCancel,
 }) {
-  // 🔥 biar gak nulis berulang
+
+  // 🔥 LOGIC UTAMA (SUDAH BENAR)
   const isAllowed = resultPercent <= threshold;
 
-  // 🔥 dummy data (nanti bisa dari backend)
+  // 🔥 DEBUG (kalau mau cek, boleh dihapus nanti)
+  console.log("RESULT:", resultPercent);
+  console.log("THRESHOLD (MEDIUM):", threshold);
+  console.log("IS ALLOWED:", isAllowed);
+
+  // 🔥 DUMMY DATA (biarin aja dulu)
   const internal = [
     { img: "https://via.placeholder.com/100", percent: 92 },
     { img: "https://via.placeholder.com/100", percent: 87 },
@@ -27,42 +33,46 @@ export default function PlagiarismVerification({
   return (
     <div className="bg-white p-6 rounded-xl shadow w-[900px] flex gap-6">
 
-      {/* LEFT IMAGE */}
+      {/* ================= LEFT IMAGE ================= */}
       <div className="flex-1 flex items-center justify-center">
         <img
           src={preview}
+          alt="preview"
           className="max-h-[400px] object-contain rounded-lg"
         />
       </div>
 
-      {/* RIGHT */}
+      {/* ================= RIGHT PANEL ================= */}
       <div className="flex-1 border-l pl-6">
 
-        {/* 🔥 INTERNAL LIST */}
+        {/* INTERNAL */}
         <SimilarityList title="Top 3 Internal" data={internal} />
 
-        {/* 🔥 EXTERNAL LIST */}
+        {/* EXTERNAL */}
         <div className="mt-4">
           <SimilarityList title="Top 3 External" data={external} />
         </div>
 
-        {/* TEXT */}
+        {/* ================= INFO TEXT ================= */}
         {isAllowed ? (
           <p className="text-xs text-gray-500 mt-4">
-            Klik "Verifikasi" untuk melanjutkan proses penyimpanan metadata karya.
+            Klik <span className="font-medium">"Verifikasi"</span> untuk melanjutkan proses penyimpanan metadata karya.
           </p>
         ) : (
           <p className="text-xs text-red-500 mt-4">
-            Melebihi batas kemiripan, tidak dapat dilanjutkan ke verifikasi.
+            Melebihi batas kemiripan (medium threshold), tidak dapat dilanjutkan ke verifikasi.
           </p>
         )}
 
-        {/* BUTTON */}
-        <div className="flex justify-end gap-3 mt-3">
+        {/* ================= BUTTON ================= */}
+        <div className="flex justify-end gap-3 mt-4">
+
+          {/* CANCEL */}
           <Button variant="secondary" onClick={onCancel}>
             Cancel
           </Button>
 
+          {/* 🔥 VERIFIKASI (HANYA MUNCUL KALAU LOLOS) */}
           {isAllowed && (
             <Button variant="success" onClick={onVerify}>
               Verifikasi
