@@ -9,7 +9,7 @@ export default function Navbar() {
   const isMetadata = location.pathname === "/metadata";
 
   return (
-    <div className="w-full bg-red-600 h-[60px] flex items-center px-10 text-white">
+    <div className="w-full relative bg-red-600 h-[60px] flex items-center px-10 text-white">
 
       <div className="flex-1 flex items-center">
         <img src={logo} className="h-10 object-contain" />
