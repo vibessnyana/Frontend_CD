@@ -1,3 +1,5 @@
+import ButtonReset from "../../ui/Button/ButtonReset.jsx";
+
 export default function SidebarFilter({
   kategori = "",
   setKategori = () => {},
@@ -40,17 +42,17 @@ export default function SidebarFilter({
           ))}
         </select>
 
-        {/* 🔥 RESET BUTTON (KECIL & WARNA) */}
+        {/* 🔥 RESET BUTTON */}
         <div className="flex justify-end pt-1">
-          <button
+          <ButtonReset
             onClick={() => {
               setKategori("");
               setSubKategori("");
             }}
-            className="px-3 py-1.5 text-xs bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+            className="text-xs px-3 py-1.5"
           >
             Reset
-          </button>
+          </ButtonReset>
         </div>
 
       </div>

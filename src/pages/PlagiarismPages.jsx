@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import Button from "../components/ui/Button.jsx";
+
+// ✅ GANTI BUTTON
+import ButtonAction from "../components/ui/button/ButtonAction.jsx";
 
 import PlagiarismUpload from "../components/features/plagiarism/PlagiarismUpload.jsx";
 import PlagiarismVerification from "../components/features/plagiarism/PlagiarismVerification.jsx";
@@ -14,7 +16,7 @@ export default function PlagiarismPages() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  // 🔥 ini sekarang MEDIUM threshold
+  // 🔥 tetap pakai medium threshold (tidak diubah)
   const [threshold, setThreshold] = useState(65);
 
   const [resultPercent, setResultPercent] = useState(65);
@@ -34,6 +36,7 @@ export default function PlagiarismPages() {
   return (
     <div className="w-full min-h-screen bg-gray-200 flex flex-col">
 
+      {/* ================= CONTENT ================= */}
       <div
         className={`
           flex-1 flex flex-col items-center
@@ -42,7 +45,7 @@ export default function PlagiarismPages() {
         `}
       >
 
-        {/* IDLE */}
+        {/* ================= IDLE ================= */}
         {status === "idle" && (
           <>
             <PlagiarismUpload
@@ -51,19 +54,20 @@ export default function PlagiarismPages() {
               setPreview={setPreview}
             />
 
-            <Button
-              variant="danger"
+            {/* ✅ GANTI KE BUTTON ACTION */}
+            <ButtonAction
               onClick={() => {
                 if (!file) return alert("Upload gambar dulu!");
                 setStatus("setting");
               }}
+              className="!bg-red-500 hover:!bg-red-600"
             >
               Cek Plagiarisme
-            </Button>
+            </ButtonAction>
           </>
         )}
 
-        {/* DETAIL */}
+        {/* ================= DETAIL ================= */}
         {status === "detail" && (
           <PlagiarismVerification
             preview={preview}
@@ -74,7 +78,7 @@ export default function PlagiarismPages() {
           />
         )}
 
-        {/* FORM */}
+        {/* ================= FORM ================= */}
         {status === "form" && (
           <PlagiarismForm
             onSubmit={() => setStatus("success")}
@@ -83,12 +87,12 @@ export default function PlagiarismPages() {
         )}
       </div>
 
-      {/* OVERLAY */}
+      {/* ================= OVERLAY ================= */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/30 z-40"></div>
       )}
 
-      {/* MODAL SETTING */}
+      {/* ================= MODAL SETTING ================= */}
       {status === "setting" && (
         <PlagiarismSettingModal
           preview={preview}
@@ -116,6 +120,7 @@ export default function PlagiarismPages() {
         />
       )}
 
+      {/* ================= MODALS ================= */}
       {status === "loading" && <LoadingModal />}
 
       {status === "result" && (

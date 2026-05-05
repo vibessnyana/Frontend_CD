@@ -1,13 +1,27 @@
 import Modal from "../../ui/Modal.jsx";
-import Button from "../../ui/Button.jsx";
+
+import ButtonAction from "../../ui/button/ButtonAction.jsx";
 
 export default function SuccessModal({ onClose }) {
   return (
     <Modal>
       <div className="flex flex-col items-center gap-3">
+
+        {/* ICON */}
         <div className="text-green-500 text-4xl">✔</div>
-        <p>Save successful</p>
-        <Button onClick={onClose}>Oke</Button>
+
+        {/* TEXT */}
+        <p className="text-gray-700 text-sm">
+          Save successful
+        </p>
+
+        {/* BUTTON */}
+        <ButtonAction 
+        onClick={onClose}
+        >
+          Oke
+        </ButtonAction>
+
       </div>
     </Modal>
   );

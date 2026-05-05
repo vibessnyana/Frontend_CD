@@ -1,23 +1,22 @@
-import Button from "../../ui/Button.jsx";
+import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
+import ButtonAction from "../../ui/button/ButtonAction.jsx";
 import SimilarityList from "./SimilarityList.jsx";
 
 export default function PlagiarismVerification({
   preview,
   resultPercent,
-  threshold, // 🔥 ini = MEDIUM threshold dari setting
+  threshold,
   onVerify,
   onCancel,
 }) {
 
-  // 🔥 LOGIC UTAMA (SUDAH BENAR)
+  // 🔥 LOGIC (TIDAK DIUBAH)
   const isAllowed = resultPercent <= threshold;
 
-  // 🔥 DEBUG (kalau mau cek, boleh dihapus nanti)
   console.log("RESULT:", resultPercent);
   console.log("THRESHOLD (MEDIUM):", threshold);
   console.log("IS ALLOWED:", isAllowed);
 
-  // 🔥 DUMMY DATA (biarin aja dulu)
   const internal = [
     { img: "https://via.placeholder.com/100", percent: 92 },
     { img: "https://via.placeholder.com/100", percent: 87 },
@@ -53,7 +52,7 @@ export default function PlagiarismVerification({
           <SimilarityList title="Top 3 External" data={external} />
         </div>
 
-        {/* ================= INFO TEXT ================= */}
+        {/* ================= INFO ================= */}
         {isAllowed ? (
           <p className="text-xs text-gray-500 mt-4">
             Klik <span className="font-medium">"Verifikasi"</span> untuk melanjutkan proses penyimpanan metadata karya.
@@ -68,16 +67,15 @@ export default function PlagiarismVerification({
         <div className="flex justify-end gap-3 mt-4">
 
           {/* CANCEL */}
-          <Button variant="secondary" onClick={onCancel}>
-            Cancel
-          </Button>
+          <ButtonCancel onClick={onCancel} />
 
-          {/* 🔥 VERIFIKASI (HANYA MUNCUL KALAU LOLOS) */}
+          {/* VERIFIKASI */}
           {isAllowed && (
-            <Button variant="success" onClick={onVerify}>
+            <ButtonAction onClick={onVerify}>
               Verifikasi
-            </Button>
+            </ButtonAction>
           )}
+
         </div>
 
       </div>

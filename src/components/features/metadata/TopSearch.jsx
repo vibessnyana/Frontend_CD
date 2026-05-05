@@ -1,3 +1,5 @@
+import ButtonAction from "../../ui/Button/ButtonAction.jsx";
+
 export default function TopSearch({ onSearch }) {
   return (
     <div className="flex mb-4">
@@ -7,12 +9,12 @@ export default function TopSearch({ onSearch }) {
         className="flex-1 p-2 border rounded-l"
       />
 
-      <button
+      <ButtonAction
         onClick={onSearch}
-        className="bg-red-500 text-white px-4 rounded-r"
+        className="bg-red-500 hover:bg-red-600 rounded-l-none px-4"
       >
         🔍
-      </button>
+      </ButtonAction>
     </div>
   );
 }

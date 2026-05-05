@@ -1,4 +1,5 @@
-import Button from "../../ui/Button.jsx";
+import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
+import ButtonConfirmDelete from "../../ui/Button/ButtonConfirmDelete.jsx";
 
 export default function ConfirmDelete({ onConfirm, onCancel }) {
   return (
@@ -10,19 +11,13 @@ export default function ConfirmDelete({ onConfirm, onCancel }) {
 
       <div className="flex justify-center gap-4">
 
-        <Button
-          onClick={onCancel}
-          variant="secondary"
-        >
+        <ButtonCancel onClick={onCancel}>
           Cancel
-        </Button>
+        </ButtonCancel>
 
-        <Button
-          onClick={onConfirm}
-          variant="primary"
-        >
+        <ButtonConfirmDelete onClick={onConfirm}>
           Yes
-        </Button>
+        </ButtonConfirmDelete>
 
       </div>
     </div>

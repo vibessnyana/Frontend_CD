@@ -1,4 +1,4 @@
-import Button from "../../ui/Button.jsx";
+import ButtonAction from "../../ui/Button/ButtonAction.jsx";
 
 export default function SuccessPopup({ text, onClose }) {
   return (
@@ -12,9 +12,9 @@ export default function SuccessPopup({ text, onClose }) {
         {text}
       </p>
 
-      <Button variant="primary" onClick={onClose}>
+      <ButtonAction onClick={onClose}>
         OK
-      </Button>
+      </ButtonAction>
 
     </div>
   );

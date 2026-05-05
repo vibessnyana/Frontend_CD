@@ -1,4 +1,5 @@
-import Button from "../../ui/Button.jsx";
+import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
+import ButtonSave from "../../ui/button/ButtonSave.jsx";
 
 export default function PlagiarismForm({ onSubmit, onCancel }) {
   return (
@@ -45,7 +46,7 @@ export default function PlagiarismForm({ onSubmit, onCancel }) {
             <textarea className="textarea-compact" />
           </div>
 
-          {/* GRID 2 KOLOM */}
+          {/* GRID */}
           <div className="grid grid-cols-2 gap-3">
 
             <div>
@@ -69,26 +70,17 @@ export default function PlagiarismForm({ onSubmit, onCancel }) {
             </div>
 
           </div>
-
         </div>
 
-        {/* BUTTON */}
+        {/* ================= BUTTON ================= */}
         <div className="flex justify-end gap-3 mt-5">
-          <Button
-            variant="secondary"
-            onClick={onCancel}
-            className="text-sm px-4 py-2 hover:bg-red-500 hover:text-white transition"
-          >
-            Cancel
-          </Button>
 
-          <Button
-            variant="success"
-            onClick={onSubmit}
-            className="text-sm px-4 py-2"
-          >
-            Save
-          </Button>
+          {/* CANCEL */}
+          <ButtonCancel onClick={onCancel} />
+
+          {/* SAVE */}
+          <ButtonSave onClick={onSubmit} />
+
         </div>
 
       </div>

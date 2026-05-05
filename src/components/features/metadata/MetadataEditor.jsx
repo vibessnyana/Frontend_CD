@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 
+import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
+import ButtonSave from "../../ui/Button/ButtonSave.jsx";
+
 function Row({ label, children }) {
   return (
     <div className="flex items-start gap-4 py-2">
@@ -64,44 +67,69 @@ export default function MetadataEditor({ data, onSave, onCancel }) {
         <div className="border-t my-4"></div>
 
         <Row label="KI ID">
-          <input value={form.ki_id || ""} onChange={(e) => handleChange("ki_id", e.target.value)} className={inputStyle} />
+          <input
+            value={form.ki_id || ""}
+            onChange={(e) => handleChange("ki_id", e.target.value)}
+            className={inputStyle}
+          />
         </Row>
 
         <Row label="UUID">
-          <input value={form.ki_uuid || ""} onChange={(e) => handleChange("ki_uuid", e.target.value)} className={inputStyle} />
+          <input
+            value={form.ki_uuid || ""}
+            onChange={(e) => handleChange("ki_uuid", e.target.value)}
+            className={inputStyle}
+          />
         </Row>
 
         <Row label="Kategori">
-          <input value={form.Kategori || ""} onChange={(e) => handleChange("Kategori", e.target.value)} className={inputStyle} />
+          <input
+            value={form.Kategori || ""}
+            onChange={(e) => handleChange("Kategori", e.target.value)}
+            className={inputStyle}
+          />
         </Row>
 
         <Row label="Sub Kategori">
-          <input value={form["Sub Kategori"] || ""} onChange={(e) => handleChange("Sub Kategori", e.target.value)} className={inputStyle} />
+          <input
+            value={form["Sub Kategori"] || ""}
+            onChange={(e) =>
+              handleChange("Sub Kategori", e.target.value)
+            }
+            className={inputStyle}
+          />
         </Row>
 
         <Row label="Kategori HC">
-          <input value={form["Kategori HC"] || ""} onChange={(e) => handleChange("Kategori HC", e.target.value)} className={inputStyle} />
+          <input
+            value={form["Kategori HC"] || ""}
+            onChange={(e) =>
+              handleChange("Kategori HC", e.target.value)
+            }
+            className={inputStyle}
+          />
         </Row>
 
         <Row label="Sub Kategori HC">
-          <input value={form["Sub Kategori HC"] || ""} onChange={(e) => handleChange("Sub Kategori HC", e.target.value)} className={inputStyle} />
+          <input
+            value={form["Sub Kategori HC"] || ""}
+            onChange={(e) =>
+              handleChange("Sub Kategori HC", e.target.value)
+            }
+            className={inputStyle}
+          />
         </Row>
 
+        {/* 🔥 BUTTON SECTION */}
         <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
 
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-red-500 hover:text-white transition"
-          >
+          <ButtonCancel onClick={onCancel}>
             Cancel
-          </button>
+          </ButtonCancel>
 
-          <button
-            onClick={() => onSave(form)}
-            className="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition"
-          >
+          <ButtonSave onClick={() => onSave(form)}>
             Save
-          </button>
+          </ButtonSave>
 
         </div>
 

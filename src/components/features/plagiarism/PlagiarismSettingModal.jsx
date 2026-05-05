@@ -1,5 +1,9 @@
 import { useState } from "react";
 
+// ✅ BUTTON BARU
+import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
+import ButtonCekPlagiarisme from "../../ui/button/ButtonCekPlagiarisme.jsx";
+
 export default function PlagiarismSettingModal({
   preview,
   onCancel,
@@ -18,6 +22,7 @@ export default function PlagiarismSettingModal({
     sensitive: { high: 80, medium: 65, low: 50 },
   };
 
+  // ================= SUBMIT =================
   const handleSubmit = () => {
     if (preset) {
       onCheck({ type: "preset", value: presets[preset] });
@@ -34,14 +39,14 @@ export default function PlagiarismSettingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-start pt-[80px]">
-      
+
       {/* OVERLAY */}
       <div className="absolute inset-0 bg-black/30" />
 
       {/* MODAL */}
       <div className="relative bg-white w-[440px] rounded-2xl shadow-xl flex flex-col max-h-[80vh]">
 
-        {/* 🔥 SCROLL AREA */}
+        {/* SCROLL AREA */}
         <div className="overflow-y-auto p-6">
 
           {/* CLOSE */}
@@ -148,22 +153,15 @@ export default function PlagiarismSettingModal({
           </div>
         </div>
 
-        {/* 🔥 FIXED BUTTON (TIDAK IKUT SCROLL) */}
+        {/* ================= BUTTON ================= */}
         <div className="border-t p-4 flex justify-end gap-3 bg-white rounded-b-2xl">
 
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-300 rounded-md text-sm hover:bg-red-500 hover:text-white transition"
-          >
-            Cancel
-          </button>
+          {/* CANCEL */}
+          <ButtonCancel onClick={onCancel} />
 
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
-          >
-            Cek Plagiarisme
-          </button>
+          {/* CEK */}
+          <ButtonCekPlagiarisme onClick={handleSubmit} />
+
         </div>
       </div>
     </div>
