@@ -22,7 +22,6 @@ export default function PlagiarismSettingModal({
     sensitive: { high: 80, medium: 65, low: 50 },
   };
 
-  // ================= SUBMIT =================
   const handleSubmit = () => {
     if (preset) {
       onCheck({ type: "preset", value: presets[preset] });
@@ -43,8 +42,12 @@ export default function PlagiarismSettingModal({
       {/* OVERLAY */}
       <div className="absolute inset-0 bg-black/30" />
 
-      {/* MODAL */}
-      <div className="relative bg-white w-[440px] rounded-2xl shadow-xl flex flex-col max-h-[80vh]">
+      {/* ✅ FIX DI SINI */}
+      <div className="
+        relative bg-white w-[440px]
+        rounded-2xl overflow-hidden   /* 🔥 INI YANG FIX */
+        shadow-xl flex flex-col max-h-[80vh]
+      ">
 
         {/* SCROLL AREA */}
         <div className="overflow-y-auto p-6">
@@ -77,7 +80,7 @@ export default function PlagiarismSettingModal({
             Anda dapat memilih <span className="font-medium">preset otomatis</span> atau
             mengatur nilai secara <span className="font-medium">manual</span>.
             <br />
-            <span className="text-xs text-gray-400">
+            <span className="text-gray-400">
               (Cukup pilih salah satu saja)
             </span>
           </p>
@@ -153,13 +156,10 @@ export default function PlagiarismSettingModal({
           </div>
         </div>
 
-        {/* ================= BUTTON ================= */}
-        <div className="border-t p-4 flex justify-end gap-3 bg-white rounded-b-2xl">
+        {/* BUTTON */}
+        <div className="border-t p-4 flex justify-end gap-3 bg-white">
 
-          {/* CANCEL */}
           <ButtonCancel onClick={onCancel} />
-
-          {/* CEK */}
           <ButtonCekPlagiarisme onClick={handleSubmit} />
 
         </div>

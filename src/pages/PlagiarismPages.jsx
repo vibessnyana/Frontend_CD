@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-
-// ✅ GANTI BUTTON
 import ButtonAction from "../components/ui/button/ButtonAction.jsx";
 
 import PlagiarismUpload from "../components/features/plagiarism/PlagiarismUpload.jsx";
@@ -10,16 +8,17 @@ import PlagiarismResult from "../components/features/plagiarism/PlagiarismResult
 import PlagiarismSettingModal from "../components/features/plagiarism/PlagiarismSettingModal.jsx";
 import LoadingModal from "../components/features/plagiarism/LoadingModal.jsx";
 import SuccessModal from "../components/features/plagiarism/SuccessModal.jsx";
+import ErrorModal from "../components/features/plagiarism/ErrorModal.jsx";
 
 export default function PlagiarismPages() {
   const [status, setStatus] = useState("idle");
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  // 🔥 tetap pakai medium threshold (tidak diubah)
   const [threshold, setThreshold] = useState(65);
-
   const [resultPercent, setResultPercent] = useState(65);
+
+  const [errorMessage, setErrorMessage] = useState(""); // 🔥 ERROR STATE
 
   useEffect(() => {
     return () => {
@@ -31,12 +30,33 @@ export default function PlagiarismPages() {
     status === "setting" ||
     status === "loading" ||
     status === "result" ||
-    status === "success";
+    status === "success" ||
+    status === "error";
+
+  // ================= HANDLE SAVE =================
+  const handleSave = () => {
+    try {
+      // 🔥 contoh kondisi error (misalnya validasi gagal)
+      const isError = false; // <-- nanti ganti pakai API
+
+      if (isError) {
+        throw new Error("Gagal menyimpan data!");
+      }
+
+      // ✅ SUCCESS
+      setStatus("success");
+
+    } catch (err) {
+      // ❌ ERROR
+      setErrorMessage(err.message || "Terjadi kesalahan!");
+      setStatus("error");
+    }
+  };
 
   return (
     <div className="w-full min-h-screen bg-gray-200 flex flex-col">
 
-      {/* ================= CONTENT ================= */}
+      {/* CONTENT */}
       <div
         className={`
           flex-1 flex flex-col items-center
@@ -54,7 +74,6 @@ export default function PlagiarismPages() {
               setPreview={setPreview}
             />
 
-            {/* ✅ GANTI KE BUTTON ACTION */}
             <ButtonAction
               onClick={() => {
                 if (!file) return alert("Upload gambar dulu!");
@@ -81,18 +100,20 @@ export default function PlagiarismPages() {
         {/* ================= FORM ================= */}
         {status === "form" && (
           <PlagiarismForm
-            onSubmit={() => setStatus("success")}
+            onSubmit={handleSave} // 🔥 FIX DI SINI
             onCancel={() => setStatus("idle")}
           />
         )}
       </div>
 
-      {/* ================= OVERLAY ================= */}
+      {/* OVERLAY */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/30 z-40"></div>
       )}
 
-      {/* ================= MODAL SETTING ================= */}
+      {/* ================= MODALS ================= */}
+
+      {/* SETTING */}
       {status === "setting" && (
         <PlagiarismSettingModal
           preview={preview}
@@ -106,8 +127,6 @@ export default function PlagiarismPages() {
               mediumValue = parseFloat(data.value.medium || 0);
             }
 
-            console.log("MEDIUM THRESHOLD:", mediumValue);
-
             setThreshold(mediumValue);
 
             setStatus("loading");
@@ -120,9 +139,10 @@ export default function PlagiarismPages() {
         />
       )}
 
-      {/* ================= MODALS ================= */}
+      {/* LOADING */}
       {status === "loading" && <LoadingModal />}
 
+      {/* RESULT */}
       {status === "result" && (
         <PlagiarismResult
           resultPercent={resultPercent}
@@ -131,9 +151,19 @@ export default function PlagiarismPages() {
         />
       )}
 
+      {/* SUCCESS */}
       {status === "success" && (
         <SuccessModal onClose={() => setStatus("idle")} />
       )}
+
+      {/* ❌ ERROR */}
+      {status === "error" && (
+        <ErrorModal
+          message={errorMessage}
+          onClose={() => setStatus("form")}
+        />
+      )}
+
     </div>
   );
 }

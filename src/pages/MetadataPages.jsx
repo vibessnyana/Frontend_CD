@@ -8,6 +8,7 @@ import ConfirmDelete from "../components/features/metadata/ConfirmDelete.jsx";
 import MetadataEditor from "../components/features/metadata/MetadataEditor.jsx";
 import BaseModal from "../components/features/metadata/BaseModal.jsx";
 import SuccessPopup from "../components/features/metadata/SuccessPopup.jsx";
+import ErrorPopup from "../components/features/metadata/ErrorPopup.jsx"; // 🔥 TAMBAH INI
 import Pagination from "../components/ui/Pagination.jsx";
 
 export default function MetadataPages() {
@@ -24,6 +25,7 @@ export default function MetadataPages() {
   const [loading, setLoading] = useState(false);
 
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // 🔥 TAMBAH INI
 
   // ================= SELECTED =================
   const selected = useMemo(() => {
@@ -109,9 +111,22 @@ export default function MetadataPages() {
     setMode("idle");
   };
 
+  // 🔥 UPDATE HANDLE SAVE (ADA ERROR)
   const handleSave = (updatedData) => {
-    handleUpdate(updatedData);
-    setSuccessMessage("Metadata berhasil disimpan!");
+    try {
+      // simulasi error (30%)
+      const isError = Math.random() < 0.3;
+
+      if (isError) {
+        throw new Error("Gagal menyimpan metadata!");
+      }
+
+      handleUpdate(updatedData);
+      setSuccessMessage("Metadata berhasil disimpan!");
+
+    } catch (err) {
+      setErrorMessage(err.message || "Terjadi kesalahan!");
+    }
   };
 
   const handleDeleteConfirm = () => {
@@ -207,6 +222,16 @@ export default function MetadataPages() {
           <SuccessPopup
             text={successMessage}
             onClose={() => setSuccessMessage("")}
+          />
+        </BaseModal>
+      )}
+
+      {/* 🔥 ERROR */}
+      {errorMessage && (
+        <BaseModal onClose={() => setErrorMessage("")}>
+          <ErrorPopup
+            text={errorMessage}
+            onClose={() => setErrorMessage("")}
           />
         </BaseModal>
       )}

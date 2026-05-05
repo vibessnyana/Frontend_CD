@@ -12,14 +12,14 @@ export default function SuccessModal({ onClose }) {
 
         {/* TEXT */}
         <p className="text-gray-700 text-sm">
-          Save successful
+          Karya Ilmiah berhasil disimpan
         </p>
 
         {/* BUTTON */}
         <ButtonAction 
         onClick={onClose}
         >
-          Oke
+          Tutup
         </ButtonAction>
 
       </div>
