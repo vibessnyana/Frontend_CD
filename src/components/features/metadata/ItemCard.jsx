@@ -3,11 +3,10 @@ export default function ItemCard({ item, onSelect }) {
 
   return (
     <div
-      onClick={() => onSelect(item)} // 🔥 HARUS onSelect
-      className="bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition"
+      onClick={() => onSelect(item)}
+      className="h-full bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition overflow-hidden"
     >
-
-      <div className="h-[120px] bg-gray-200 rounded-md mb-3"></div>
+      <div className="h-[150px] bg-gray-200 rounded-md mb-3"></div>
 
       <h3 className="font-semibold text-sm mb-1 line-clamp-1">
         {item["Judul KI"]}
@@ -25,7 +24,6 @@ export default function ItemCard({ item, onSelect }) {
         <span className="font-semibold">Sub:</span>{" "}
         {item["Sub Kategori"]}
       </p>
-
     </div>
   );
 }

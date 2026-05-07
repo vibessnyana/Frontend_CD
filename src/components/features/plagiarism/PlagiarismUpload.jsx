@@ -19,8 +19,7 @@ export default function PlagiarismUpload({ preview, setFile, setPreview }) {
   const handleDrop = (e) => {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files[0];
-    handleFile(file);
+    handleFile(e.dataTransfer.files[0]);
   };
 
   return (
@@ -33,15 +32,15 @@ export default function PlagiarismUpload({ preview, setFile, setPreview }) {
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={`
-        w-full max-w-[800px] h-[400px]
+        w-full h-[400px]
         rounded-2xl border-2 border-dashed
         flex items-center justify-center
         cursor-pointer transition-all duration-200
-        shadow-md hover:shadow-lg   /* 🔥 SHADOW */
+        shadow-sm hover:shadow-md
         ${
           dragging
-            ? "border-red-400 bg-red-50"
-            : "border-gray-300 bg-white hover:border-red-400 hover:bg-gray-50"
+            ? "border-red-400 bg-red-50 ring-4 ring-red-100"
+            : "border-gray-300 bg-white hover:border-red-400 hover:bg-red-50/30"
         }
       `}
     >
@@ -57,17 +56,16 @@ export default function PlagiarismUpload({ preview, setFile, setPreview }) {
         <div className="w-full h-full p-6 flex items-center justify-center">
           <img
             src={preview}
+            alt="preview"
             className="max-h-full max-w-full object-contain rounded-xl shadow"
           />
         </div>
       ) : (
         <div className="flex flex-col items-center text-center">
-
-          {/* 🔥 ICON SVG (LEBIH PROFESSIONAL) */}
-          <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4 shadow-sm">
+          <div className="w-16 h-16 flex items-center justify-center rounded-full bg-red-50 mb-4 shadow-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-8 h-8 text-gray-500"
+              className="w-8 h-8 text-red-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -81,16 +79,17 @@ export default function PlagiarismUpload({ preview, setFile, setPreview }) {
             </svg>
           </div>
 
-          {/* TITLE */}
           <p className="text-base font-semibold text-gray-700">
             Upload gambar
           </p>
 
-          {/* SUBTEXT */}
           <p className="text-sm text-gray-400 mt-1">
             Drag & drop atau klik untuk memilih file
           </p>
 
+          <p className="text-xs text-gray-400 mt-3">
+            Format: JPG, PNG, WEBP
+          </p>
         </div>
       )}
     </div>

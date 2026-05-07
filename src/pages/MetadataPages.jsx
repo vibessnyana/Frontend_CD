@@ -8,12 +8,10 @@ import ConfirmDelete from "../components/features/metadata/ConfirmDelete.jsx";
 import MetadataEditor from "../components/features/metadata/MetadataEditor.jsx";
 import BaseModal from "../components/features/metadata/BaseModal.jsx";
 import SuccessPopup from "../components/features/metadata/SuccessPopup.jsx";
-import ErrorPopup from "../components/features/metadata/ErrorPopup.jsx"; // 🔥 TAMBAH INI
+import ErrorPopup from "../components/features/metadata/ErrorPopup.jsx";
 import Pagination from "../components/ui/Pagination.jsx";
 
 export default function MetadataPages() {
-
-  // ================= STATE =================
   const [mode, setMode] = useState("idle");
   const [selectedId, setSelectedId] = useState(null);
 
@@ -25,14 +23,15 @@ export default function MetadataPages() {
   const [loading, setLoading] = useState(false);
 
   const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); // 🔥 TAMBAH INI
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // ================= SELECTED =================
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const selected = useMemo(() => {
     return data.find((item) => item._id === selectedId);
   }, [data, selectedId]);
 
-  // ================= FILTER LIST =================
   const kategoriList = [...new Set(data.map((d) => d.Kategori))];
 
   const subKategoriList = [
@@ -43,27 +42,17 @@ export default function MetadataPages() {
     ),
   ];
 
-  // ================= FILTER DATA =================
   const filteredData = data.filter((item) => {
     const matchSearch = Object.values(item)
       .join(" ")
       .toLowerCase()
       .includes(search.toLowerCase());
 
-    const matchKategori = kategori
-      ? item.Kategori === kategori
-      : true;
-
-    const matchSub = subKategori
-      ? item["Sub Kategori"] === subKategori
-      : true;
+    const matchKategori = kategori ? item.Kategori === kategori : true;
+    const matchSub = subKategori ? item["Sub Kategori"] === subKategori : true;
 
     return matchSearch && matchKategori && matchSub;
   });
-
-  // ================= PAGINATION =================
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -76,7 +65,6 @@ export default function MetadataPages() {
     currentPage * itemsPerPage
   );
 
-  // ================= LOADING =================
   useEffect(() => {
     setLoading(true);
 
@@ -87,34 +75,27 @@ export default function MetadataPages() {
     return () => clearTimeout(timeout);
   }, [search, kategori, subKategori, currentPage]);
 
-  // ================= ACTIONS =================
   const handleSelect = (item) => {
     setSelectedId(item._id);
     setMode("preview");
   };
 
   const handleDelete = () => {
-    setData((prev) =>
-      prev.filter((item) => item._id !== selectedId)
-    );
+    setData((prev) => prev.filter((item) => item._id !== selectedId));
     setMode("idle");
   };
 
   const handleUpdate = (updatedData) => {
     setData((prev) =>
       prev.map((item) =>
-        item._id === selectedId
-          ? { ...item, ...updatedData }
-          : item
+        item._id === selectedId ? { ...item, ...updatedData } : item
       )
     );
     setMode("idle");
   };
 
-  // 🔥 UPDATE HANDLE SAVE (ADA ERROR)
   const handleSave = (updatedData) => {
     try {
-      // simulasi error (30%)
       const isError = Math.random() < 0.3;
 
       if (isError) {
@@ -123,7 +104,6 @@ export default function MetadataPages() {
 
       handleUpdate(updatedData);
       setSuccessMessage("Metadata berhasil disimpan!");
-
     } catch (err) {
       setErrorMessage(err.message || "Terjadi kesalahan!");
     }
@@ -134,55 +114,50 @@ export default function MetadataPages() {
     setSuccessMessage("Metadata berhasil dihapus!");
   };
 
-  // ================= UI =================
   return (
-    <div className="w-full min-h-screen bg-gray-200 flex flex-col">
-
-      <div className="flex gap-4 px-6 pt-3 pb-6">
-
-        {/* FILTER */}
-        <div className="w-[200px]">
-          <SidebarFilter
-            kategori={kategori}
-            setKategori={setKategori}
-            subKategori={subKategori}
-            setSubKategori={setSubKategori}
-            kategoriList={kategoriList}
-            subKategoriList={subKategoriList}
-          />
-        </div>
-
-        {/* CONTENT */}
-        <div className="flex-1">
-
-          {/* SEARCH */}
-          <div className="flex mb-4">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search for Metadata Property"
-              className="w-full px-4 py-2 border rounded-lg text-sm outline-none bg-white"
+    <div className="w-full h-[calc(100vh-60px)] overflow-hidden bg-gray-100 flex flex-col">
+      <div className="h-full px-6 pt-5 pb-4 flex flex-col">
+        <div className="flex-1 mb-4  flex gap-4">
+          <div className="w-[360px] shrink-0">
+            <SidebarFilter
+              kategori={kategori}
+              setKategori={setKategori}
+              subKategori={subKategori}
+              setSubKategori={setSubKategori}
+              kategoriList={kategoriList}
+              subKategoriList={subKategoriList}
             />
           </div>
 
-          {/* GRID */}
-          <ItemGrid
-            data={currentData || []}
-            onSelect={handleSelect}
-            loading={loading}
-          />
+          <div className="flex-1 min-w-0 flex flex-col">
+            <div className="mb-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search for Metadata Property"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-gray-50 focus:bg-white focus:border-red-400"
+              />
+            </div>
+            <div className="min-h-0 mb-4 p-4 inset-shadow-2xs rounded-xl border border-gray-100 bg-white">
+              <ItemGrid
+                data={currentData || []}
+                onSelect={handleSelect}
+                loading={loading}
+              />
+            </div>
+          </div>
+        </div>
 
-          {/* PAGINATION */}
+        <div className="ml-[316px] -mt-3 h-10 shrink-0 flex items-center justify-center">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
+            className="mt-0"
           />
-
         </div>
       </div>
 
-      {/* PREVIEW */}
       {mode === "preview" && selected && (
         <BaseModal onClose={() => setMode("idle")}>
           <PreviewModal
@@ -194,7 +169,6 @@ export default function MetadataPages() {
         </BaseModal>
       )}
 
-      {/* DELETE */}
       {mode === "delete" && selected && (
         <BaseModal onClose={() => setMode("idle")}>
           <ConfirmDelete
@@ -204,7 +178,6 @@ export default function MetadataPages() {
         </BaseModal>
       )}
 
-      {/* EDIT */}
       {mode === "edit" && selected && (
         <BaseModal onClose={() => setMode("idle")}>
           <MetadataEditor
@@ -216,7 +189,6 @@ export default function MetadataPages() {
         </BaseModal>
       )}
 
-      {/* SUCCESS */}
       {successMessage && (
         <BaseModal onClose={() => setSuccessMessage("")}>
           <SuccessPopup
@@ -226,7 +198,6 @@ export default function MetadataPages() {
         </BaseModal>
       )}
 
-      {/* 🔥 ERROR */}
       {errorMessage && (
         <BaseModal onClose={() => setErrorMessage("")}>
           <ErrorPopup
@@ -235,7 +206,6 @@ export default function MetadataPages() {
           />
         </BaseModal>
       )}
-
     </div>
   );
 }

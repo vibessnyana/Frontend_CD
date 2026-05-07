@@ -9,6 +9,7 @@ import PlagiarismSettingModal from "../components/features/plagiarism/Plagiarism
 import LoadingModal from "../components/features/plagiarism/LoadingModal.jsx";
 import SuccessModal from "../components/features/plagiarism/SuccessModal.jsx";
 import ErrorModal from "../components/features/plagiarism/ErrorModal.jsx";
+import { checkPlagiarism } from "../services/PlagiarismService.jsx";
 
 export default function PlagiarismPages() {
   const [status, setStatus] = useState("idle");
@@ -17,8 +18,9 @@ export default function PlagiarismPages() {
 
   const [threshold, setThreshold] = useState(65);
   const [resultPercent, setResultPercent] = useState(65);
+  const [plagiarismResult, setPlagiarismResult] = useState(null);
 
-  const [errorMessage, setErrorMessage] = useState(""); // 🔥 ERROR STATE
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     return () => {
@@ -26,116 +28,149 @@ export default function PlagiarismPages() {
     };
   }, [preview]);
 
-  const isModalOpen =
-    status === "setting" ||
-    status === "loading" ||
-    status === "result" ||
-    status === "success" ||
-    status === "error";
+  const modalStatuses = [
+    "setting",
+    "loading",
+    "result",
+    "detail",
+    "form",
+    "success",
+    "error",
+  ];
+  const isModalOpen = modalStatuses.includes(status);
+  const fileName = file?.name || "Belum ada file dipilih";
 
-  // ================= HANDLE SAVE =================
   const handleSave = () => {
     try {
-      // 🔥 contoh kondisi error (misalnya validasi gagal)
-      const isError = false; // <-- nanti ganti pakai API
+      const isError = false;
 
       if (isError) {
         throw new Error("Gagal menyimpan data!");
       }
 
-      // ✅ SUCCESS
       setStatus("success");
-
     } catch (err) {
-      // ❌ ERROR
       setErrorMessage(err.message || "Terjadi kesalahan!");
       setStatus("error");
     }
   };
 
-  return (
-    <div className="w-full min-h-screen bg-gray-200 flex flex-col">
+  const normalizePercent = (value) => Number((Number(value || 0) * 100).toFixed(2));
 
+  const toDecimalThresholds = (value) => ({
+    high: Number(value.high) / 100,
+    medium: Number(value.medium) / 100,
+    low: Number(value.low) / 100,
+  });
+
+  const handleCheck = async (data) => {
+    try {
+      const selectedThreshold = data.value?.medium || 0;
+      setThreshold(Number(selectedThreshold));
+      setErrorMessage("");
+      setStatus("loading");
+
+      const response = await checkPlagiarism({
+        file,
+        preset: data.type === "preset" ? data.preset : null,
+        thresholds: data.type === "manual" ? toDecimalThresholds(data.value) : null,
+      });
+
+      const score = response?.similarity_result?.overall_score || 0;
+      setPlagiarismResult(response);
+      setResultPercent(normalizePercent(score));
+      setStatus("result");
+    } catch (err) {
+      setErrorMessage(err.message || "Gagal mengecek plagiarisme");
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div className="w-full h-[calc(100vh-60px)] overflow-hidden bg-gray-100 flex flex-col">
       {/* CONTENT */}
       <div
         className={`
-          flex-1 flex flex-col items-center
-          pt-4 gap-4
-          ${isModalOpen ? "blur-sm" : ""}
+          flex-1 flex flex-col items-center px-6 py-6
+          transition duration-200
+          ${isModalOpen ? "blur-sm scale-[0.99]" : ""}
         `}
       >
+        {(status === "idle" || isModalOpen) && (
+          <div className="w-full max-w-[860px]">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Upload gambar karya untuk memeriksa kemiripan internal dan eksternal.
+                </p>
+              </div>
 
-        {/* ================= IDLE ================= */}
-        {status === "idle" && (
-          <>
+              <div className="rounded-lg bg-white px-4 py-2 text-right shadow-sm border border-gray-100">
+                <p className="text-xs text-gray-400">Medium threshold</p>
+                <p className="text-sm font-semibold text-gray-700">{threshold}%</p>
+              </div>
+            </div>
+
             <PlagiarismUpload
               preview={preview}
               setFile={setFile}
               setPreview={setPreview}
             />
 
-            <ButtonAction
-              onClick={() => {
-                if (!file) return alert("Upload gambar dulu!");
-                setStatus("setting");
-              }}
-              className="!bg-red-500 hover:!bg-red-600"
-            >
-              Cek Plagiarisme
-            </ButtonAction>
-          </>
-        )}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-full truncate text-sm text-gray-500">
+                File: <span className="font-medium text-gray-700">{fileName}</span>
+              </p>
 
-        {/* ================= DETAIL ================= */}
-        {status === "detail" && (
-          <PlagiarismVerification
-            preview={preview}
-            resultPercent={resultPercent}
-            threshold={threshold}
-            onVerify={() => setStatus("form")}
-            onCancel={() => setStatus("idle")}
-          />
-        )}
-
-        {/* ================= FORM ================= */}
-        {status === "form" && (
-          <PlagiarismForm
-            onSubmit={handleSave} // 🔥 FIX DI SINI
-            onCancel={() => setStatus("idle")}
-          />
+              <ButtonAction
+                onClick={() => {
+                  if (!file) return alert("Upload gambar dulu!");
+                  setStatus("setting");
+                }}
+                className="!bg-red-500 hover:!bg-red-600 sm:min-w-[170px]"
+              >
+                Cek Plagiarisme
+              </ButtonAction>
+            </div>
+          </div>
         )}
       </div>
 
       {/* OVERLAY */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40"></div>
+        <div className="fixed inset-0 bg-black/35 z-40"></div>
       )}
 
-      {/* ================= MODALS ================= */}
+      {/* DETAIL */}
+      {status === "detail" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6">
+          <PlagiarismVerification
+            preview={preview}
+            resultPercent={resultPercent}
+            threshold={threshold}
+            result={plagiarismResult}
+            onVerify={() => setStatus("form")}
+            onCancel={() => setStatus("idle")}
+          />
+        </div>
+      )}
+
+      {/* FORM */}
+      {status === "form" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6">
+          <PlagiarismForm
+            onSubmit={handleSave}
+            onCancel={() => setStatus("idle")}
+          />
+        </div>
+      )}
 
       {/* SETTING */}
       {status === "setting" && (
         <PlagiarismSettingModal
           preview={preview}
           onCancel={() => setStatus("idle")}
-          onCheck={(data) => {
-            let mediumValue = 0;
-
-            if (data.type === "preset") {
-              mediumValue = data.value.medium;
-            } else {
-              mediumValue = parseFloat(data.value.medium || 0);
-            }
-
-            setThreshold(mediumValue);
-
-            setStatus("loading");
-
-            setTimeout(() => {
-              setResultPercent(65);
-              setStatus("result");
-            }, 1000);
-          }}
+          onCheck={handleCheck}
         />
       )}
 
@@ -146,6 +181,7 @@ export default function PlagiarismPages() {
       {status === "result" && (
         <PlagiarismResult
           resultPercent={resultPercent}
+          result={plagiarismResult}
           onCancel={() => setStatus("idle")}
           onDetail={() => setStatus("detail")}
         />
@@ -156,14 +192,13 @@ export default function PlagiarismPages() {
         <SuccessModal onClose={() => setStatus("idle")} />
       )}
 
-      {/* ❌ ERROR */}
+      {/* ERROR */}
       {status === "error" && (
         <ErrorModal
           message={errorMessage}
-          onClose={() => setStatus("form")}
+          onClose={() => setStatus(plagiarismResult ? "form" : "idle")}
         />
       )}
-
     </div>
   );
 }

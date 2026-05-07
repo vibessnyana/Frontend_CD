@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-// ✅ BUTTON BARU
 import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
 import ButtonCekPlagiarisme from "../../ui/button/ButtonCekPlagiarisme.jsx";
 
@@ -24,12 +23,32 @@ export default function PlagiarismSettingModal({
 
   const handleSubmit = () => {
     if (preset) {
-      onCheck({ type: "preset", value: presets[preset] });
+      onCheck({ type: "preset", preset, value: presets[preset] });
       return;
     }
 
-    if (manual.medium !== "") {
-      onCheck({ type: "manual", value: manual });
+    const high = Number(manual.high);
+    const medium = Number(manual.medium);
+    const low = Number(manual.low);
+    const hasManualValue = manual.high || manual.medium || manual.low;
+
+    if (hasManualValue) {
+      if (!manual.high || !manual.medium || !manual.low) {
+        alert("Threshold manual harus diisi lengkap: high, medium, dan low.");
+        return;
+      }
+
+      if (!(low < medium && medium < high)) {
+        alert("Urutan threshold harus: Low < Medium < High.");
+        return;
+      }
+
+      if (low < 30 || high > 98) {
+        alert("Threshold manual harus berada di rentang 30% sampai 98%.");
+        return;
+      }
+
+      onCheck({ type: "manual", value: { high, medium, low } });
       return;
     }
 
@@ -38,42 +57,33 @@ export default function PlagiarismSettingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-start pt-[80px]">
-
-      {/* OVERLAY */}
       <div className="absolute inset-0 bg-black/30" />
 
-      {/* ✅ FIX DI SINI */}
       <div className="
         relative bg-white w-[440px]
-        rounded-2xl overflow-hidden   /* 🔥 INI YANG FIX */
+        rounded-2xl overflow-hidden
         shadow-xl flex flex-col max-h-[80vh]
       ">
-
-        {/* SCROLL AREA */}
         <div className="overflow-y-auto p-6">
-
-          {/* CLOSE */}
           <button
             onClick={onCancel}
             className="absolute top-3 right-4 text-gray-400 hover:text-red-500"
           >
-            ✕
+            x
           </button>
 
-          {/* IMAGE */}
           {preview && (
             <img
               src={preview}
+              alt="preview"
               className="w-full h-[140px] object-cover rounded-lg mb-4"
             />
           )}
 
-          {/* TITLE */}
           <h2 className="text-lg font-semibold text-gray-800 mb-1">
             Batas Maksimum Kemiripan (%)
           </h2>
 
-          {/* DESC */}
           <p className="text-xs text-gray-500 leading-relaxed mb-5">
             Jika hasil melebihi nilai ini, karya tidak dapat diverifikasi.
             <br />
@@ -85,7 +95,6 @@ export default function PlagiarismSettingModal({
             </span>
           </p>
 
-          {/* PRESET */}
           <div className="mb-4">
             <label className="text-sm font-medium text-gray-700 block mb-1">
               Preset
@@ -107,13 +116,12 @@ export default function PlagiarismSettingModal({
 
             {preset && (
               <p className="text-xs text-gray-400 mt-2">
-                High: {presets[preset].high}% • Medium:{" "}
-                {presets[preset].medium}% • Low: {presets[preset].low}%
+                High: {presets[preset].high}% - Medium:{" "}
+                {presets[preset].medium}% - Low: {presets[preset].low}%
               </p>
             )}
           </div>
 
-          {/* MANUAL */}
           <div className="mb-6">
             <label className="text-sm font-medium text-gray-700 block mb-2">
               Manual
@@ -156,12 +164,9 @@ export default function PlagiarismSettingModal({
           </div>
         </div>
 
-        {/* BUTTON */}
         <div className="border-t p-4 flex justify-end gap-3 bg-white">
-
           <ButtonCancel onClick={onCancel} />
           <ButtonCekPlagiarisme onClick={handleSubmit} />
-
         </div>
       </div>
     </div>
