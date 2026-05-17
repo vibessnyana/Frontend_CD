@@ -7,11 +7,11 @@ export default function BaseModal({ children, onClose }) {
       {/* 🔥 BACKGROUND OVERLAY + BLUR */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-modal-backdrop"
       ></div>
 
       {/* MODAL CONTENT */}
-      <div className="relative z-10">
+      <div className="relative z-10 animate-modal-panel">
         {children}
       </div>
 

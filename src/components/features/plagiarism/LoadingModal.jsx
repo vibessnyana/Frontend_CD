@@ -12,6 +12,7 @@ const loadingSteps = [
 
 export default function LoadingModal() {
   const [stepIndex, setStepIndex] = useState(0);
+  const progress = Math.round(((stepIndex + 1) / loadingSteps.length) * 100);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -35,6 +36,19 @@ export default function LoadingModal() {
         <p className="mt-2 min-h-[20px] text-sm text-gray-500">
           {loadingSteps[stepIndex]}
         </p>
+
+        <div className="mt-4 w-full">
+          <div className="mb-1 flex items-center justify-between text-xs text-gray-400">
+            <span>Progress</span>
+            <span>{progress}%</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+            <div
+              className="h-full rounded-full bg-red-500 transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
 
         <p className="mt-3 text-xs text-gray-400 leading-relaxed">
           Proses ini bisa memakan beberapa detik. Mohon jangan menutup halaman.

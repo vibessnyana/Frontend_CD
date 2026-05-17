@@ -16,8 +16,8 @@ export default function PlagiarismPages() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  const [threshold, setThreshold] = useState(65);
-  const [resultPercent, setResultPercent] = useState(65);
+  const [threshold, setThreshold] = useState(0);
+  const [resultPercent, setResultPercent] = useState(0);
   const [plagiarismResult, setPlagiarismResult] = useState(null);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -55,6 +55,16 @@ export default function PlagiarismPages() {
     }
   };
 
+  const handleResetFlow = () => {
+    setStatus("idle");
+    setFile(null);
+    setPreview(null);
+    setThreshold(0);
+    setResultPercent(0);
+    setPlagiarismResult(null);
+    setErrorMessage("");
+  };
+
   const normalizePercent = (value) => Number((Number(value || 0) * 100).toFixed(2));
 
   const toDecimalThresholds = (value) => ({
@@ -65,7 +75,7 @@ export default function PlagiarismPages() {
 
   const handleCheck = async (data) => {
     try {
-      const selectedThreshold = data.value?.medium || 0;
+      const selectedThreshold = data.value?.high || 0;
       setThreshold(Number(selectedThreshold));
       setErrorMessage("");
       setStatus("loading");
@@ -75,6 +85,7 @@ export default function PlagiarismPages() {
         preset: data.type === "preset" ? data.preset : null,
         thresholds: data.type === "manual" ? toDecimalThresholds(data.value) : null,
       });
+      console.log("Plagiarism check response:", response);
 
       const score = response?.similarity_result?.overall_score || 0;
       setPlagiarismResult(response);
@@ -105,10 +116,10 @@ export default function PlagiarismPages() {
                 </p>
               </div>
 
-              <div className="rounded-lg bg-white px-4 py-2 text-right shadow-sm border border-gray-100">
+              {/* <div className="rounded-lg bg-white px-4 py-2 text-right shadow-sm border border-gray-100">
                 <p className="text-xs text-gray-400">Medium threshold</p>
                 <p className="text-sm font-semibold text-gray-700">{threshold}%</p>
-              </div>
+              </div> */}
             </div>
 
             <PlagiarismUpload
@@ -138,12 +149,12 @@ export default function PlagiarismPages() {
 
       {/* OVERLAY */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/35 z-40"></div>
+        <div className="fixed inset-0 bg-black/35 z-40 animate-modal-backdrop"></div>
       )}
 
       {/* DETAIL */}
       {status === "detail" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 animate-modal-panel">
           <PlagiarismVerification
             preview={preview}
             resultPercent={resultPercent}
@@ -157,7 +168,7 @@ export default function PlagiarismPages() {
 
       {/* FORM */}
       {status === "form" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 animate-modal-panel">
           <PlagiarismForm
             onSubmit={handleSave}
             onCancel={() => setStatus("idle")}
@@ -189,7 +200,7 @@ export default function PlagiarismPages() {
 
       {/* SUCCESS */}
       {status === "success" && (
-        <SuccessModal onClose={() => setStatus("idle")} />
+        <SuccessModal onClose={handleResetFlow} />
       )}
 
       {/* ERROR */}

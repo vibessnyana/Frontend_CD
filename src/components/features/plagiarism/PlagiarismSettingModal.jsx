@@ -21,6 +21,11 @@ export default function PlagiarismSettingModal({
     sensitive: { high: 80, medium: 65, low: 50 },
   };
 
+  const formatThresholdRange = ({ high, medium }) =>
+    `High: 100% - ${high}% | Medium: ${high - 1}% - ${medium}% | Low: ${
+      medium - 1
+    }% - 1%`;
+
   const handleSubmit = () => {
     if (preset) {
       onCheck({ type: "preset", preset, value: presets[preset] });
@@ -43,8 +48,8 @@ export default function PlagiarismSettingModal({
         return;
       }
 
-      if (low < 30 || high > 98) {
-        alert("Threshold manual harus berada di rentang 30% sampai 98%.");
+      if (low < 1 || high > 100) {
+        alert("Threshold manual harus berada di rentang 1% sampai 100%.");
         return;
       }
 
@@ -57,12 +62,12 @@ export default function PlagiarismSettingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-start pt-[80px]">
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/30 animate-modal-backdrop" />
 
       <div className="
         relative bg-white w-[440px]
         rounded-2xl overflow-hidden
-        shadow-xl flex flex-col max-h-[80vh]
+        shadow-xl flex flex-col max-h-[80vh] animate-modal-panel
       ">
         <div className="overflow-y-auto p-6">
           <button
@@ -116,8 +121,7 @@ export default function PlagiarismSettingModal({
 
             {preset && (
               <p className="text-xs text-gray-400 mt-2">
-                High: {presets[preset].high}% - Medium:{" "}
-                {presets[preset].medium}% - Low: {presets[preset].low}%
+                {formatThresholdRange(presets[preset])}
               </p>
             )}
           </div>

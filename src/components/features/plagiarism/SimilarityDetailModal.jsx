@@ -21,8 +21,8 @@ export default function SimilarityDetailModal({ item, onClose }) {
   if (!item) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-4">
-      <div className="w-[760px] max-w-[95vw] overflow-hidden rounded-xl bg-white shadow-xl">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-4 animate-modal-backdrop">
+      <div className="w-[760px] max-w-[95vw] overflow-hidden rounded-xl bg-white shadow-xl animate-modal-panel">
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div>
             <p className="text-xs font-medium uppercase text-red-500">

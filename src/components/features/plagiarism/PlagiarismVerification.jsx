@@ -29,11 +29,22 @@ export default function PlagiarismVerification({
   const similarityResult = result?.similarity_result;
   const decision = result?.decision_result?.decision;
   const riskLevel = decision?.risk_level || "unknown";
-  const statusLabel = isAllowed ? "Dapat Diverifikasi" : "Perlu Ditinjau";
-  const scoreColor = isAllowed ? "text-green-600" : "text-red-500";
-  const statusClass = isAllowed
-    ? "bg-green-50 text-green-700 border-green-100"
-    : "bg-red-50 text-red-600 border-red-100";
+  const needsReview = isAllowed && riskLevel !== "low";
+  const statusLabel = !isAllowed
+    ? "Tidak Dapat Diverifikasi"
+    : needsReview
+      ? "Perlu Review"
+      : "Dapat Diverifikasi";
+  const scoreColor = !isAllowed
+    ? "text-red-500"
+    : needsReview
+      ? "text-yellow-600"
+      : "text-green-600";
+  const statusClass = !isAllowed
+    ? "bg-red-50 text-red-600 border-red-100"
+    : needsReview
+      ? "bg-yellow-50 text-yellow-700 border-yellow-100"
+      : "bg-green-50 text-green-700 border-green-100";
 
   const internal =
     similarityResult?.results?.internal_top3?.map(mapSimilarityItem) || [];
@@ -89,7 +100,7 @@ export default function PlagiarismVerification({
             </div>
 
             <div className="rounded-lg bg-gray-50 p-3">
-              <p className="text-xs text-gray-400">Threshold</p>
+              <p className="text-xs text-gray-400">Batas verifikasi</p>
               <p className="text-2xl font-bold text-gray-700">
                 {threshold}%
               </p>
@@ -125,9 +136,11 @@ export default function PlagiarismVerification({
           )}
 
           <div className={`mt-4 rounded-lg border p-3 text-xs ${statusClass}`}>
-            {isAllowed
-              ? 'Klik "Verifikasi" untuk melanjutkan proses penyimpanan metadata karya.'
-              : "Melebihi batas kemiripan, tidak dapat dilanjutkan ke verifikasi."}
+            {!isAllowed
+              ? "Melebihi batas kemiripan, tidak dapat dilanjutkan ke verifikasi."
+              : needsReview
+                ? 'Kemiripan masih di bawah batas verifikasi, tetapi masuk kategori review. Periksa detail sebelum klik "Verifikasi".'
+                : 'Klik "Verifikasi" untuk melanjutkan proses penyimpanan metadata karya.'}
           </div>
 
           <div className="flex justify-end gap-3 mt-4">
