@@ -29,7 +29,9 @@ export default function PlagiarismVerification({
   const similarityResult = result?.similarity_result;
   const decision = result?.decision_result?.decision;
   const riskLevel = decision?.risk_level || "unknown";
-  const needsReview = isAllowed && riskLevel !== "low";
+  const normalizedRiskLevel = riskLevel.toLowerCase();
+  const isLowRisk = ["very_low", "low"].includes(normalizedRiskLevel);
+  const needsReview = isAllowed && !isLowRisk;
   const statusLabel = !isAllowed
     ? "Tidak Dapat Diverifikasi"
     : needsReview
