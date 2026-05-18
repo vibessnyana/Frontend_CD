@@ -16,7 +16,9 @@ function InfoRow({ label, value }) {
 
 export default function SimilarityDetailModal({ item, onClose }) {
   const raw = item?.raw || {};
+  const metadata = raw.metadata || {};
   const sourceUrl = raw.source_url || item?.sourceUrl;
+  const isInternal = raw.source === "internal";
 
   if (!item) return null;
 
@@ -45,23 +47,28 @@ export default function SimilarityDetailModal({ item, onClose }) {
         <div className="grid grid-cols-[240px_minmax(0,1fr)] gap-5 p-5">
           <div className="min-w-0">
             <div className="h-[220px] rounded-lg bg-gray-100 p-2 flex items-center justify-center overflow-hidden">
-            {item.img ? (
-              <img
-                src={item.img}
-                alt={item.title || "similarity detail"}
-                className="max-h-full max-w-full rounded-md object-contain"
-              />
-            ) : (
-              <span className="text-sm text-gray-400">Tidak ada gambar</span>
-            )}
+              {item.img ? (
+                <img
+                  src={item.img}
+                  alt={item.title || "similarity detail"}
+                  className="max-h-full max-w-full rounded-md object-contain"
+                />
+              ) : (
+                <span className="text-sm text-gray-400">Tidak ada gambar</span>
+              )}
             </div>
           </div>
 
           <div className="min-w-0 space-y-3 ">
-            <InfoRow label="Judul" value={item.title || raw.title} />
+            <InfoRow label="Judul" value={item.title || raw.title || metadata.title} />
             <InfoRow label="Sumber" value={raw.source || "-"} />
-            <InfoRow label="Owner" value={raw.owner || item.owner} />
-            <InfoRow label="Image ID" value={raw.image_id} />
+
+            {isInternal && (
+              <>
+                <InfoRow label="KI UUID" value={metadata.ki_uuid} />
+                <InfoRow label="Kategori" value={metadata.copyright_sub_category || metadata.category} />
+              </>
+            )}
 
             <div className="grid grid-cols-3 gap-3 rounded-lg bg-gray-50 p-3 min-w-0">
               <InfoRow label="Skor Akhir" value={formatPercent(raw.final_score)} />
@@ -69,18 +76,18 @@ export default function SimilarityDetailModal({ item, onClose }) {
               <InfoRow label="Detail Visual" value={formatPercent(raw.cnn_score)} />
             </div>
 
-            <InfoRow label="Image URL" value={raw.image_url || item.img} />
+            <InfoRow label="Image URL" value={metadata.image_url || raw.image_url || item.img} />
             <div className="flex justify-center gap-2">
-            {sourceUrl && (
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
-              >
-                Buka sumber
-              </a>
-            )}
+              {sourceUrl && (
+                <a
+                  href={sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+                >
+                  Buka sumber
+                </a>
+              )}
             </div>
           </div>
         </div>

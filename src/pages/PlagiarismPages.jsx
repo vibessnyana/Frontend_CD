@@ -9,7 +9,7 @@ import PlagiarismSettingModal from "../components/features/plagiarism/Plagiarism
 import LoadingModal from "../components/features/plagiarism/LoadingModal.jsx";
 import SuccessModal from "../components/features/plagiarism/SuccessModal.jsx";
 import ErrorModal from "../components/features/plagiarism/ErrorModal.jsx";
-import { checkPlagiarism } from "../services/PlagiarismService.jsx";
+import { approveReviewCheck, checkPlagiarism, registerMetadata, rejectReviewCheck } from "../services/PlagiarismService.jsx";
 
 export default function PlagiarismPages() {
   const [status, setStatus] = useState("idle");
@@ -19,6 +19,8 @@ export default function PlagiarismPages() {
   const [threshold, setThreshold] = useState(0);
   const [resultPercent, setResultPercent] = useState(0);
   const [plagiarismResult, setPlagiarismResult] = useState(null);
+  const [registrationResult, setRegistrationResult] = useState(null);
+  const [isSavingMetadata, setIsSavingMetadata] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -40,18 +42,20 @@ export default function PlagiarismPages() {
   const isModalOpen = modalStatuses.includes(status);
   const fileName = file?.name || "Belum ada file dipilih";
 
-  const handleSave = () => {
+  const handleSave = async (metadataPayload) => {
+    if (isSavingMetadata) return;
+
     try {
-      const isError = false;
-
-      if (isError) {
-        throw new Error("Gagal menyimpan data!");
-      }
-
+      setIsSavingMetadata(true);
+      setErrorMessage("");
+      const response = await registerMetadata(metadataPayload);
+      setRegistrationResult(response);
       setStatus("success");
     } catch (err) {
-      setErrorMessage(err.message || "Terjadi kesalahan!");
+      setErrorMessage(err.message || "Gagal menyimpan metadata");
       setStatus("error");
+    } finally {
+      setIsSavingMetadata(false);
     }
   };
 
@@ -62,6 +66,8 @@ export default function PlagiarismPages() {
     setThreshold(0);
     setResultPercent(0);
     setPlagiarismResult(null);
+    setRegistrationResult(null);
+    setIsSavingMetadata(false);
     setErrorMessage("");
   };
 
@@ -73,6 +79,43 @@ export default function PlagiarismPages() {
     low: Number(value.low) / 100,
   });
 
+  const handleApproveReview = async () => {
+    try {
+      if (!plagiarismResult?.check_id) return;
+      setErrorMessage("");
+      const response = await approveReviewCheck(plagiarismResult.check_id);
+      setPlagiarismResult((current) => ({
+        ...current,
+        can_register: true,
+        registration_status: "allowed",
+        registration_reason: response.message || "Hasil review disetujui. Metadata dapat didaftarkan.",
+        manual_review_status: response.manual_review_status,
+        manual_review_reason: response.manual_review_reason,
+      }));
+    } catch (err) {
+      setErrorMessage(err.message || "Gagal menyetujui hasil review");
+      setStatus("error");
+    }
+  };
+
+  const handleRejectReview = async () => {
+    try {
+      if (!plagiarismResult?.check_id) return;
+      setErrorMessage("");
+      const response = await rejectReviewCheck(plagiarismResult.check_id);
+      setPlagiarismResult((current) => ({
+        ...current,
+        can_register: false,
+        registration_status: "blocked",
+        registration_reason: response.message || "Hasil review ditolak. Metadata tidak dapat didaftarkan.",
+        manual_review_status: response.manual_review_status,
+        manual_review_reason: response.manual_review_reason,
+      }));
+    } catch (err) {
+      setErrorMessage(err.message || "Gagal menolak hasil review");
+      setStatus("error");
+    }
+  };
   const handleCheck = async (data) => {
     try {
       const selectedThreshold = data.value?.high || 0;
@@ -160,8 +203,10 @@ export default function PlagiarismPages() {
             resultPercent={resultPercent}
             threshold={threshold}
             result={plagiarismResult}
-            onVerify={() => setStatus("form")}
+            onVerify={() => plagiarismResult?.can_register && setStatus("form")}
             onCancel={() => setStatus("idle")}
+            onApproveReview={handleApproveReview}
+            onRejectReview={handleRejectReview}
           />
         </div>
       )}
@@ -170,8 +215,10 @@ export default function PlagiarismPages() {
       {status === "form" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 animate-modal-panel">
           <PlagiarismForm
+            checkId={plagiarismResult?.check_id}
             onSubmit={handleSave}
             onCancel={() => setStatus("idle")}
+            isSubmitting={isSavingMetadata}
           />
         </div>
       )}
@@ -200,7 +247,7 @@ export default function PlagiarismPages() {
 
       {/* SUCCESS */}
       {status === "success" && (
-        <SuccessModal onClose={handleResetFlow} />
+        <SuccessModal onClose={handleResetFlow} result={registrationResult} />
       )}
 
       {/* ERROR */}
@@ -213,3 +260,5 @@ export default function PlagiarismPages() {
     </div>
   );
 }
+
+

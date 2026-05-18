@@ -1,6 +1,4 @@
 import Modal from "../../ui/Modal.jsx";
-
-// ✅ BUTTON BARU
 import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
 import ButtonAction from "../../ui/button/ButtonAction.jsx";
 
@@ -12,20 +10,26 @@ export default function PlagiarismResult({
 }) {
   const riskLevel = result?.decision_result?.decision?.risk_level;
   const requiresReview = result?.decision_result?.decision?.requires_review;
+  const canRegister = Boolean(result?.can_register);
+  const registrationStatus = result?.registration_status;
+  const statusColor = canRegister ? "text-green-600" : "text-red-500";
 
   return (
     <Modal>
       <div className="flex flex-col items-center text-center">
-
-        {/* PERCENT */}
-        <h1 className="text-5xl font-bold text-yellow-500 mb-2">
+        <h1 className={`text-5xl font-bold mb-2 ${statusColor}`}>
           {resultPercent}%
         </h1>
 
-        {/* TEXT */}
         <p className="text-gray-600 mb-1">
           Tingkat Kemiripan Terdeteksi
         </p>
+
+        {registrationStatus && (
+          <p className="text-xs text-gray-500 mb-1">
+            Status registrasi: <span className="font-medium capitalize">{registrationStatus}</span>
+          </p>
+        )}
 
         {riskLevel && (
           <p className="text-xs text-gray-500 mb-1">
@@ -38,19 +42,12 @@ export default function PlagiarismResult({
           Klik "Lihat Detail" untuk melihat kemiripan
         </p>
 
-        {/* BUTTON */}
         <div className="flex gap-3">
-
-          {/* CANCEL */}
           <ButtonCancel onClick={onCancel} />
-
-          {/* LIHAT DETAIL */}
           <ButtonAction onClick={onDetail}>
             Lihat Detail
           </ButtonAction>
-
         </div>
-
       </div>
     </Modal>
   );

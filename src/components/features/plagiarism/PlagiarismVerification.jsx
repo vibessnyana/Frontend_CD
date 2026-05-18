@@ -5,12 +5,16 @@ import SimilarityList from "./SimilarityList.jsx";
 import SimilarityDetailModal from "./SimilarityDetailModal.jsx";
 
 function mapSimilarityItem(item) {
+  const metadata = item.metadata || {};
+  const isInternal = item.source === "internal";
+
   return {
-    img: item.image_url,
+    img: metadata.image_url || item.image_url,
     percent: Number(((item.final_score || 0) * 100).toFixed(2)),
-    title: item.title,
-    owner: item.owner,
-    sourceUrl: item.source_url,
+    title: metadata.title || item.title,
+    owner: isInternal ? "Sumber: internal" : item.owner,
+    sourceUrl: item.source_url || metadata.image_url,
+    sourceType: item.source,
     raw: item,
   };
 }
@@ -22,31 +26,37 @@ export default function PlagiarismVerification({
   result,
   onVerify,
   onCancel,
+  onApproveReview,
+  onRejectReview,
 }) {
   const [selectedMatch, setSelectedMatch] = useState(null);
 
-  const isAllowed = resultPercent <= threshold;
   const similarityResult = result?.similarity_result;
   const decision = result?.decision_result?.decision;
+  const canRegister = Boolean(result?.can_register);
+  const registrationStatus = result?.registration_status;
+  const normalizedRegistrationStatus = String(registrationStatus || "").toLowerCase();
+  const registrationReason = result?.registration_reason;
   const riskLevel = decision?.risk_level || "unknown";
-  const normalizedRiskLevel = riskLevel.toLowerCase();
-  const isLowRisk = ["very_low", "low"].includes(normalizedRiskLevel);
-  const needsReview = isAllowed && !isLowRisk;
-  const statusLabel = !isAllowed
-    ? "Tidak Dapat Diverifikasi"
-    : needsReview
+  const requiresReview = Boolean(decision?.requires_review);
+  const needsReview = normalizedRegistrationStatus === "review_required" || requiresReview;
+  const isReviewRequired = normalizedRegistrationStatus === "review_required";
+  const canVerify = canRegister && normalizedRegistrationStatus === "allowed";
+  const statusLabel = !canRegister
+    ? normalizedRegistrationStatus === "review_required"
       ? "Perlu Review"
-      : "Dapat Diverifikasi";
-  const scoreColor = !isAllowed
-    ? "text-red-500"
-    : needsReview
+      : "Tidak Dapat Diverifikasi"
+    : "Dapat Diverifikasi";
+  const scoreColor = !canRegister
+    ? needsReview
       ? "text-yellow-600"
-      : "text-green-600";
-  const statusClass = !isAllowed
-    ? "bg-red-50 text-red-600 border-red-100"
-    : needsReview
+      : "text-red-500"
+    : "text-green-600";
+  const statusClass = !canRegister
+    ? needsReview
       ? "bg-yellow-50 text-yellow-700 border-yellow-100"
-      : "bg-green-50 text-green-700 border-green-100";
+      : "bg-red-50 text-red-600 border-red-100"
+    : "bg-green-50 text-green-700 border-green-100";
 
   const internal =
     similarityResult?.results?.internal_top3?.map(mapSimilarityItem) || [];
@@ -90,6 +100,26 @@ export default function PlagiarismVerification({
               </div>
             )}
           </div>
+
+          {isReviewRequired && (
+            <div className="mt-4 rounded-xl border border-yellow-100 bg-yellow-50 p-3">
+              <p className="mb-3 text-xs font-medium text-yellow-700">
+                Review manual diperlukan sebelum metadata dapat diverifikasi.
+              </p>
+              <div className="flex justify-end justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={onRejectReview}
+                  className="rounded-md bg-white px-4 py-2 text-sm font-medium text-red-600 ring-1 ring-red-100 hover:bg-red-50"
+                >
+                  Reject
+                </button>
+                <ButtonAction onClick={onApproveReview} className="!bg-yellow-500 hover:!bg-yellow-600">
+                  Approve
+                </ButtonAction>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="basis-[60%] min-w-0 border-l pl-6">
@@ -102,9 +132,9 @@ export default function PlagiarismVerification({
             </div>
 
             <div className="rounded-lg bg-gray-50 p-3">
-              <p className="text-xs text-gray-400">Batas verifikasi</p>
-              <p className="text-2xl font-bold text-gray-700">
-                {threshold}%
+              <p className="text-xs text-gray-400">Status registrasi</p>
+              <p className="text-lg font-bold capitalize text-gray-700">
+                {registrationStatus || "-"}
               </p>
             </div>
           </div>
@@ -138,21 +168,28 @@ export default function PlagiarismVerification({
           )}
 
           <div className={`mt-4 rounded-lg border p-3 text-xs ${statusClass}`}>
-            {!isAllowed
-              ? "Melebihi batas kemiripan, tidak dapat dilanjutkan ke verifikasi."
-              : needsReview
-                ? 'Kemiripan masih di bawah batas verifikasi, tetapi masuk kategori review. Periksa detail sebelum klik "Verifikasi".'
-                : 'Klik "Verifikasi" untuk melanjutkan proses penyimpanan metadata karya.'}
+            {registrationReason ||
+              (canRegister
+                ? 'Klik "Verifikasi" untuk melanjutkan proses penyimpanan metadata karya.'
+                : "Hasil belum dapat dilanjutkan ke registrasi metadata.")}
           </div>
 
           <div className="flex justify-end gap-3 mt-4">
             <ButtonCancel onClick={onCancel} />
 
-            {isAllowed && (
-              <ButtonAction onClick={onVerify}>
-                Verifikasi
-              </ButtonAction>
-            )}
+            <button
+              type="button"
+              onClick={canVerify ? onVerify : undefined}
+              disabled={!canVerify}
+              aria-disabled={!canVerify}
+              className={
+                canVerify
+                  ? "rounded-md bg-green-500 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-green-600 active:scale-95"
+                  : "pointer-events-none cursor-not-allowed rounded-md border border-gray-200 bg-gray-200/60 px-5 py-2 text-sm font-medium text-gray-400 opacity-70 shadow-none"
+              }
+            >
+              Verifikasi
+            </button>
           </div>
         </div>
       </div>
@@ -166,3 +203,8 @@ export default function PlagiarismVerification({
     </div>
   );
 }
+
+
+
+
+
