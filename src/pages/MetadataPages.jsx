@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import metadataData from "../data/metadata.json";
 
 import SidebarFilter from "../components/features/metadata/SidebarFilter.jsx";
 import ItemGrid from "../components/features/metadata/ItemGrid.jsx";
@@ -11,6 +10,8 @@ import SuccessPopup from "../components/features/metadata/SuccessPopup.jsx";
 import ErrorPopup from "../components/features/metadata/ErrorPopup.jsx";
 import Pagination from "../components/ui/Pagination.jsx";
 
+import { getMetadataList } from "../services/MetadataService.jsx";
+
 export default function MetadataPages() {
   const [mode, setMode] = useState("idle");
   const [selectedId, setSelectedId] = useState(null);
@@ -19,8 +20,9 @@ export default function MetadataPages() {
   const [kategori, setKategori] = useState("");
   const [subKategori, setSubKategori] = useState("");
 
-  const [data, setData] = useState(metadataData);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,31 +30,79 @@ export default function MetadataPages() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchMetadata() {
+      try {
+        setLoading(true);
+
+        const metadata = await getMetadataList();
+
+        console.log("DATA SETELAH NORMALIZE:", metadata);
+        console.log("JUMLAH DATA SETELAH NORMALIZE:", metadata.length);
+
+        if (isMounted) {
+          setData(metadata);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setErrorMessage(err.message || "Gagal mengambil data metadata");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchMetadata();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const selected = useMemo(() => {
     return data.find((item) => item._id === selectedId);
   }, [data, selectedId]);
 
-  const kategoriList = [...new Set(data.map((d) => d.Kategori))];
+  const kategoriList = useMemo(() => {
+    return [
+      ...new Set(
+        data
+          .map((d) => d.Kategori)
+          .filter((item) => item && item.trim() !== "")
+      ),
+    ];
+  }, [data]);
 
-  const subKategoriList = [
-    ...new Set(
-      data
-        .filter((d) => (kategori ? d.Kategori === kategori : true))
-        .map((d) => d["Sub Kategori"])
-    ),
-  ];
+  const subKategoriList = useMemo(() => {
+    return [
+      ...new Set(
+        data
+          .filter((d) => (kategori ? d.Kategori === kategori : true))
+          .map((d) => d["Sub Kategori"])
+          .filter((item) => item && item.trim() !== "")
+      ),
+    ];
+  }, [data, kategori]);
 
-  const filteredData = data.filter((item) => {
-    const matchSearch = Object.values(item)
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      const matchSearch = Object.values(item)
+        .join(" ")
+        .toLowerCase()
+        .includes(search.toLowerCase());
 
-    const matchKategori = kategori ? item.Kategori === kategori : true;
-    const matchSub = subKategori ? item["Sub Kategori"] === subKategori : true;
+      const matchKategori = kategori ? item.Kategori === kategori : true;
+      const matchSub = subKategori
+        ? item["Sub Kategori"] === subKategori
+        : true;
 
-    return matchSearch && matchKategori && matchSub;
-  });
+      return matchSearch && matchKategori && matchSub;
+    });
+  }, [data, search, kategori, subKategori]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -66,10 +116,10 @@ export default function MetadataPages() {
   );
 
   useEffect(() => {
-    setLoading(true);
+    setPageLoading(true);
 
     const timeout = setTimeout(() => {
-      setLoading(false);
+      setPageLoading(false);
     }, 500);
 
     return () => clearTimeout(timeout);
@@ -96,12 +146,6 @@ export default function MetadataPages() {
 
   const handleSave = (updatedData) => {
     try {
-      const isError = Math.random() < 0.3;
-
-      if (isError) {
-        throw new Error("Gagal menyimpan metadata!");
-      }
-
       handleUpdate(updatedData);
       setSuccessMessage("Metadata berhasil disimpan!");
     } catch (err) {
@@ -117,7 +161,7 @@ export default function MetadataPages() {
   return (
     <div className="w-full h-[calc(100vh-60px)] overflow-hidden bg-gray-100 flex flex-col">
       <div className="h-full px-6 pt-5 pb-4 flex flex-col">
-        <div className="flex-1 mb-4  flex gap-4">
+        <div className="flex-1 mb-4 flex gap-4">
           <div className="w-[360px] shrink-0">
             <SidebarFilter
               kategori={kategori}
@@ -138,11 +182,12 @@ export default function MetadataPages() {
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-gray-50 focus:bg-white focus:border-red-400"
               />
             </div>
+
             <div className="min-h-0 mb-4 p-4 inset-shadow-2xs rounded-xl border border-gray-100 bg-white">
               <ItemGrid
                 data={currentData || []}
                 onSelect={handleSelect}
-                loading={loading}
+                loading={loading || pageLoading}
               />
             </div>
           </div>
