@@ -5,6 +5,13 @@ function getErrorMessage(error, fallback) {
 
   if (typeof error.detail === "string") return error.detail;
 
+  if (Array.isArray(error.detail)) {
+    return error.detail
+      .map((item) => item.msg)
+      .filter(Boolean)
+      .join(", ");
+  }
+
   if (error.detail?.message) return error.detail.message;
 
   if (error.message) return error.message;
@@ -60,7 +67,23 @@ function getMetadataArray(result) {
   return found || [];
 }
 
-function normalizeMetadata(item, index) {
+function getMetadataObject(result) {
+  if (!result) return null;
+
+  if (Array.isArray(result)) {
+    return result[0] || null;
+  }
+
+  if (result.data && !Array.isArray(result.data)) return result.data;
+  if (result.metadata && !Array.isArray(result.metadata)) return result.metadata;
+  if (result.item && !Array.isArray(result.item)) return result.item;
+  if (result.result && !Array.isArray(result.result)) return result.result;
+  if (result.payload && !Array.isArray(result.payload)) return result.payload;
+
+  return result;
+}
+
+function normalizeMetadata(item, index = 0) {
   return {
     ...item,
 
@@ -148,6 +171,56 @@ function normalizeMetadata(item, index) {
       item.image ??
       item.gambar ??
       "",
+
+    cloudinary_public_id:
+      item.cloudinary_public_id ??
+      item.cloudinaryPublicId ??
+      "",
+  };
+}
+
+function toBackendPayload(data) {
+  return {
+    ki_id: data.ki_id ?? "",
+    ki_uuid: data.ki_uuid ?? "",
+
+    title:
+      data["Judul KI"] ??
+      data.title ??
+      "",
+
+    description:
+      data.Deskripsi ??
+      data.description ??
+      "",
+
+    category:
+      data.Kategori ??
+      data.category ??
+      "",
+
+    sub_category:
+      data["Sub Kategori"] ??
+      data.sub_category ??
+      "",
+
+    copyright_category:
+      data["Kategori HC"] ??
+      data.copyright_category ??
+      "",
+
+    copyright_sub_category:
+      data["Sub Kategori HC"] ??
+      data.copyright_sub_category ??
+      "",
+
+    image_url:
+      data.image_url ??
+      "",
+
+    cloudinary_public_id:
+      data.cloudinary_public_id ??
+      "",
   };
 }
 
@@ -165,27 +238,22 @@ export async function getMetadataList() {
 
   const metadataList = getMetadataArray(result);
 
-  console.log("RESPONSE ASLI METADATA:", result);
-  console.log("DATA METADATA YANG DIPAKAI:", metadataList);
-  console.log("JUMLAH DATA METADATA:", metadataList.length);
-
   const normalizedData = metadataList.map((item, index) =>
     normalizeMetadata(item, index)
   );
-
-  console.log("DATA METADATA SETELAH NORMALIZE:", normalizedData);
-  console.log("JUMLAH DATA SETELAH NORMALIZE:", normalizedData.length);
 
   return normalizedData;
 }
 
 export async function updateMetadata(metadataId, payload) {
+  const backendPayload = toBackendPayload(payload);
+
   const response = await fetch(`${API_BASE_URL}/metadata/${metadataId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(backendPayload),
   });
 
   if (!response.ok) {
@@ -193,7 +261,18 @@ export async function updateMetadata(metadataId, payload) {
     throw new Error(getErrorMessage(error, "Gagal memperbarui metadata"));
   }
 
-  return response.json();
+  const result = await response.json().catch(() => null);
+  const updatedItem = getMetadataObject(result);
+
+  if (!updatedItem) {
+    return normalizeMetadata({
+      ...payload,
+      ...backendPayload,
+      id: metadataId,
+    });
+  }
+
+  return normalizeMetadata(updatedItem);
 }
 
 export async function deleteMetadata(metadataId) {
@@ -206,5 +285,5 @@ export async function deleteMetadata(metadataId) {
     throw new Error(getErrorMessage(error, "Gagal menghapus metadata"));
   }
 
-  return response.json();
+  return response.json().catch(() => null);
 }

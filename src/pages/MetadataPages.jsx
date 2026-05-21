@@ -10,7 +10,11 @@ import SuccessPopup from "../components/features/metadata/SuccessPopup.jsx";
 import ErrorPopup from "../components/features/metadata/ErrorPopup.jsx";
 import Pagination from "../components/ui/Pagination.jsx";
 
-import { getMetadataList } from "../services/MetadataService.jsx";
+import {
+  getMetadataList,
+  updateMetadata,
+  deleteMetadata,
+} from "../services/MetadataService.jsx";
 
 export default function MetadataPages() {
   const [mode, setMode] = useState("idle");
@@ -38,9 +42,6 @@ export default function MetadataPages() {
         setLoading(true);
 
         const metadata = await getMetadataList();
-
-        console.log("DATA SETELAH NORMALIZE:", metadata);
-        console.log("JUMLAH DATA SETELAH NORMALIZE:", metadata.length);
 
         if (isMounted) {
           setData(metadata);
@@ -130,32 +131,45 @@ export default function MetadataPages() {
     setMode("preview");
   };
 
-  const handleDelete = () => {
-    setData((prev) => prev.filter((item) => item._id !== selectedId));
-    setMode("idle");
-  };
-
-  const handleUpdate = (updatedData) => {
-    setData((prev) =>
-      prev.map((item) =>
-        item._id === selectedId ? { ...item, ...updatedData } : item
-      )
-    );
-    setMode("idle");
-  };
-
-  const handleSave = (updatedData) => {
+  const handleDeleteConfirm = async () => {
     try {
-      handleUpdate(updatedData);
-      setSuccessMessage("Metadata berhasil disimpan!");
+      await deleteMetadata(selectedId);
+
+      setData((prev) => prev.filter((item) => item._id !== selectedId));
+      setMode("idle");
+      setSelectedId(null);
+      setSuccessMessage("Metadata berhasil dihapus!");
     } catch (err) {
-      setErrorMessage(err.message || "Terjadi kesalahan!");
+      setErrorMessage(err.message || "Gagal menghapus metadata");
     }
   };
 
-  const handleDeleteConfirm = () => {
-    handleDelete();
-    setSuccessMessage("Metadata berhasil dihapus!");
+  const handleSave = async (updatedData) => {
+    try {
+      const payload = {
+        ...selected,
+        ...updatedData,
+      };
+
+      const updatedMetadata = await updateMetadata(selectedId, payload);
+
+      setData((prev) =>
+        prev.map((item) =>
+          item._id === selectedId
+            ? {
+                ...item,
+                ...updatedMetadata,
+                _id: item._id,
+              }
+            : item
+        )
+      );
+
+      setMode("idle");
+      setSuccessMessage("Metadata berhasil disimpan!");
+    } catch (err) {
+      setErrorMessage(err.message || "Gagal menyimpan metadata");
+    }
   };
 
   return (
