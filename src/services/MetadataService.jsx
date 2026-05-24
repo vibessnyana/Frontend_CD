@@ -241,6 +241,7 @@ export async function getMetadataList() {
   const normalizedData = metadataList.map((item, index) =>
     normalizeMetadata(item, index)
   );
+  console.log(getMetadataList())
 
   return normalizedData;
 }

@@ -30,7 +30,17 @@ export default function PreviewModal({
           Detail Metadata
         </h2>
 
-        <div className="w-full h-[180px] bg-gray-200 rounded-lg mb-4"></div>
+        {data.image_url ? (
+          <div className="w-full max-h-[350px] rounded-lg mb-4 bg-white flex items-center justify-center overflow-hidden">
+            <img
+              src={data.image_url}
+              alt={data["Judul KI"] || "Gambar metadata"}
+              className="w-full max-h-[350px] object-contain"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-[180px] bg-gray-200 rounded-lg mb-4"></div>
+        )}
 
         <Row label="Judul" value={data["Judul KI"]} />
         <Row label="Deskripsi" value={data.Deskripsi} />
@@ -51,8 +61,10 @@ export default function PreviewModal({
             Cancel
           </ButtonCancel>
 
-          <ButtonAction onClick={onEdit}
-          className="!bg-blue-500 hover:!bg-blue-600">
+          <ButtonAction
+            onClick={onEdit}
+            className="!bg-blue-500 hover:!bg-blue-600"
+          >
             Update
           </ButtonAction>
 

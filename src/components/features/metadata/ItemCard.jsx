@@ -6,7 +6,15 @@ export default function ItemCard({ item, onSelect }) {
       onClick={() => onSelect(item)}
       className="h-full bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition overflow-hidden"
     >
-      <div className="h-[150px] bg-gray-200 rounded-md mb-3"></div>
+      {item.image_url ? (
+        <img
+          src={item.image_url}
+          alt={item["Judul KI"] || "Gambar metadata"}
+          className="h-[150px] w-full object-cover rounded-md mb-3 bg-gray-200"
+        />
+      ) : (
+        <div className="h-[150px] bg-gray-200 rounded-md mb-3"></div>
+      )}
 
       <h3 className="font-semibold text-sm mb-1 line-clamp-1">
         {item["Judul KI"]}
