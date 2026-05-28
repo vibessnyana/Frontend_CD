@@ -54,7 +54,7 @@ export default function PlagiarismForm({ checkId, onSubmit, onCancel, isSubmitti
 
         <div className="space-y-4 max-h-[420px] overflow-y-auto px-2">
           <div>
-            <label className="label">Judul KI</label>
+            <label className="label">Judul</label>
             <textarea className="textarea-compact" value={values.title} onChange={updateField("title")} />
           </div>
 

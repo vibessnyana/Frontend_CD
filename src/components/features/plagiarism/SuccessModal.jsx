@@ -12,7 +12,7 @@ export default function SuccessModal({ onClose }) {
 
         {/* TEXT */}
         <p className="text-gray-700 text-sm">
-          Karya Ilmiah berhasil disimpan
+          Karya berhasil disimpan
         </p>
 
         {/* BUTTON */}
