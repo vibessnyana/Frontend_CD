@@ -1,6 +1,6 @@
 import Modal from "../../ui/Modal.jsx";
-import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
-import ButtonAction from "../../ui/button/ButtonAction.jsx";
+import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
+import ButtonAction from "../../ui/Button/ButtonAction.jsx";
 
 export default function PlagiarismResult({
   resultPercent,

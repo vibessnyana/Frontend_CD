@@ -1,6 +1,6 @@
 import Modal from "../../ui/Modal.jsx";
 
-import ButtonAction from "../../ui/button/ButtonAction.jsx";
+import ButtonAction from "../../ui/Button/ButtonAction.jsx";
 
 export default function SuccessModal({ onClose }) {
   return (

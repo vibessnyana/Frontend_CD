@@ -1,10 +1,8 @@
 import { useState } from "react";
-import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
-import ButtonSave from "../../ui/button/ButtonSave.jsx";
+import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
+import ButtonSave from "../../ui/Button/ButtonSave.jsx";
 
 const initialForm = {
-  ki_id: "",
-  ki_uuid: "",
   title: "",
   description: "",
   category: "HAK CIPTA",
@@ -55,18 +53,6 @@ export default function PlagiarismForm({ checkId, onSubmit, onCancel, isSubmitti
         </p>
 
         <div className="space-y-4 max-h-[420px] overflow-y-auto px-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label">KI ID</label>
-              <input className="input-compact break-words" value={values.ki_id} onChange={updateField("ki_id")} />
-            </div>
-
-            <div>
-              <label className="label">KI UUID</label>
-              <input className="input-compact break-words" value={values.ki_uuid} onChange={updateField("ki_uuid")} />
-            </div>
-          </div>
-
           <div>
             <label className="label">Judul KI</label>
             <textarea className="textarea-compact" value={values.title} onChange={updateField("title")} />

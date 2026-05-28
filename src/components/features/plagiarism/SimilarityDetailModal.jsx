@@ -64,10 +64,7 @@ export default function SimilarityDetailModal({ item, onClose }) {
             <InfoRow label="Sumber" value={raw.source || "-"} />
 
             {isInternal && (
-              <>
-                <InfoRow label="KI UUID" value={metadata.ki_uuid} />
-                <InfoRow label="Kategori" value={metadata.copyright_sub_category || metadata.category} />
-              </>
+              <InfoRow label="Kategori" value={metadata.copyright_sub_category || metadata.category} />
             )}
 
             <div className="grid grid-cols-3 gap-3 rounded-lg bg-gray-50 p-3 min-w-0">

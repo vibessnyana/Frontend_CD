@@ -1,6 +1,10 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function getErrorMessage(error, fallback) {
+function getErrorMessage(error, fallback, status) {
+  if (status >= 500) {
+    return "Layanan sedang bermasalah. Silakan coba beberapa saat lagi.";
+  }
+
   if (!error) return fallback;
 
   if (typeof error.detail === "string") return error.detail;
@@ -17,6 +21,11 @@ function getErrorMessage(error, fallback) {
   if (error.message) return error.message;
 
   return fallback;
+}
+
+async function throwRequestError(response, fallback) {
+  const error = await response.json().catch(() => null);
+  throw new Error(getErrorMessage(error, fallback, response.status));
 }
 
 function getMetadataArray(result) {
@@ -181,9 +190,6 @@ function normalizeMetadata(item, index = 0) {
 
 function toBackendPayload(data) {
   return {
-    ki_id: data.ki_id ?? "",
-    ki_uuid: data.ki_uuid ?? "",
-
     title:
       data["Judul KI"] ??
       data.title ??
@@ -230,8 +236,7 @@ export async function getMetadataList() {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(getErrorMessage(error, "Gagal mengambil data metadata"));
+    await throwRequestError(response, "Gagal mengambil data metadata");
   }
 
   const result = await response.json();
@@ -241,8 +246,6 @@ export async function getMetadataList() {
   const normalizedData = metadataList.map((item, index) =>
     normalizeMetadata(item, index)
   );
-  console.log(getMetadataList())
-
   return normalizedData;
 }
 
@@ -258,8 +261,7 @@ export async function updateMetadata(metadataId, payload) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(getErrorMessage(error, "Gagal memperbarui metadata"));
+    await throwRequestError(response, "Gagal memperbarui metadata");
   }
 
   const result = await response.json().catch(() => null);
@@ -282,8 +284,7 @@ export async function deleteMetadata(metadataId) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(getErrorMessage(error, "Gagal menghapus metadata"));
+    await throwRequestError(response, "Gagal menghapus metadata");
   }
 
   return response.json().catch(() => null);

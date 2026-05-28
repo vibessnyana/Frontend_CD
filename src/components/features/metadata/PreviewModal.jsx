@@ -47,8 +47,6 @@ export default function PreviewModal({
 
         <div className="border-t my-4"></div>
 
-        <Row label="KI ID" value={data.ki_id} />
-        <Row label="UUID" value={data.ki_uuid} />
         <Row label="Kategori" value={data.Kategori} />
         <Row label="Sub Kategori" value={data["Sub Kategori"]} />
         <Row label="Kategori HC" value={data["Kategori HC"]} />

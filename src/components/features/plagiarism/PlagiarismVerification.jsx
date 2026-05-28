@@ -1,6 +1,6 @@
 import { useState } from "react";
-import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
-import ButtonAction from "../../ui/button/ButtonAction.jsx";
+import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
+import ButtonAction from "../../ui/Button/ButtonAction.jsx";
 import SimilarityList from "./SimilarityList.jsx";
 import SimilarityDetailModal from "./SimilarityDetailModal.jsx";
 

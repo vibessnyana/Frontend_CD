@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ButtonAction from "../components/ui/button/ButtonAction.jsx";
+import ButtonAction from "../components/ui/Button/ButtonAction.jsx";
 
 import PlagiarismUpload from "../components/features/plagiarism/PlagiarismUpload.jsx";
 import PlagiarismVerification from "../components/features/plagiarism/PlagiarismVerification.jsx";
@@ -128,8 +128,6 @@ export default function PlagiarismPages() {
         preset: data.type === "preset" ? data.preset : null,
         thresholds: data.type === "manual" ? toDecimalThresholds(data.value) : null,
       });
-      console.log("Plagiarism check response:", response);
-
       const score = response?.similarity_result?.overall_score || 0;
       setPlagiarismResult(response);
       setResultPercent(normalizePercent(score));

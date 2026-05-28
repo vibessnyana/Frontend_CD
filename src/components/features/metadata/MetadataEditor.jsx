@@ -22,8 +22,6 @@ export default function MetadataEditor({ data, onSave, onCancel }) {
       setForm({
         "Judul KI": data["Judul KI"] || "",
         Deskripsi: data.Deskripsi || "",
-        ki_id: data.ki_id || "",
-        ki_uuid: data.ki_uuid || "",
         Kategori: data.Kategori || "",
         "Sub Kategori": data["Sub Kategori"] || "",
         "Kategori HC": data["Kategori HC"] || "",
@@ -65,22 +63,6 @@ export default function MetadataEditor({ data, onSave, onCancel }) {
         </Row>
 
         <div className="border-t my-4"></div>
-
-        <Row label="KI ID">
-          <input
-            value={form.ki_id || ""}
-            onChange={(e) => handleChange("ki_id", e.target.value)}
-            className={inputStyle}
-          />
-        </Row>
-
-        <Row label="UUID">
-          <input
-            value={form.ki_uuid || ""}
-            onChange={(e) => handleChange("ki_uuid", e.target.value)}
-            className={inputStyle}
-          />
-        </Row>
 
         <Row label="Kategori">
           <input

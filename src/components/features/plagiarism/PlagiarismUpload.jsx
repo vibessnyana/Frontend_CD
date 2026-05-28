@@ -1,5 +1,9 @@
 import { useState, useRef } from "react";
 
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export default function PlagiarismUpload({ preview, setFile, setPreview }) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef(null);
@@ -7,8 +11,13 @@ export default function PlagiarismUpload({ preview, setFile, setPreview }) {
   const handleFile = (file) => {
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Hanya file gambar!");
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      alert("Format gambar harus JPG, PNG, atau WEBP.");
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      alert(`Ukuran gambar maksimal ${MAX_FILE_SIZE_MB} MB.`);
       return;
     }
 
@@ -48,7 +57,7 @@ export default function PlagiarismUpload({ preview, setFile, setPreview }) {
         ref={inputRef}
         type="file"
         className="hidden"
-        accept="image/*"
+        accept={ALLOWED_IMAGE_TYPES.join(",")}
         onChange={(e) => handleFile(e.target.files[0])}
       />
 

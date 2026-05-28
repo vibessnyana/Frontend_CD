@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import ButtonCancel from "../../ui/button/ButtonCancel.jsx";
-import ButtonCekPlagiarisme from "../../ui/button/ButtonCekPlagiarisme.jsx";
+import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
+import ButtonCekPlagiarisme from "../../ui/Button/ButtonCekPlagiarisme.jsx";
 
 export default function PlagiarismSettingModal({
   preview,

@@ -1,11 +1,20 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function getErrorMessage(error, fallback) {
+function getErrorMessage(error, fallback, status) {
+  if (status >= 500) {
+    return "Layanan sedang bermasalah. Silakan coba beberapa saat lagi.";
+  }
+
   if (!error) return fallback;
   if (typeof error.detail === "string") return error.detail;
   if (error.detail?.message) return error.detail.message;
   if (error.message) return error.message;
   return fallback;
+}
+
+async function throwRequestError(response, fallback) {
+  const error = await response.json().catch(() => null);
+  throw new Error(getErrorMessage(error, fallback, response.status));
 }
 
 export async function checkPlagiarism({ file, preset, thresholds }) {
@@ -29,8 +38,7 @@ export async function checkPlagiarism({ file, preset, thresholds }) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(getErrorMessage(error, "Gagal mengecek plagiarisme"));
+    await throwRequestError(response, "Gagal mengecek plagiarisme");
   }
 
   return response.json();
@@ -46,8 +54,7 @@ export async function registerMetadata(payload) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(getErrorMessage(error, "Gagal menyimpan metadata"));
+    await throwRequestError(response, "Gagal menyimpan metadata");
   }
 
   return response.json();
@@ -62,8 +69,7 @@ export async function approveReviewCheck(checkId, reason = "Disetujui reviewer")
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(getErrorMessage(error, "Gagal menyetujui hasil review"));
+    await throwRequestError(response, "Gagal menyetujui hasil review");
   }
 
   return response.json();
@@ -79,8 +85,7 @@ export async function rejectReviewCheck(checkId, reason = "Ditolak reviewer") {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(getErrorMessage(error, "Gagal menolak hasil review"));
+    await throwRequestError(response, "Gagal menolak hasil review");
   }
 
   return response.json();
