@@ -10,16 +10,16 @@ export default function Navbar() {
     }`;
 
   return (
-    <div className="w-full relative bg-red-600 h-[60px] flex items-center px-10 text-white shadow-sm">
+    <div className="relative flex min-h-[60px] w-full flex-wrap items-center gap-3 bg-red-600 px-4 py-2 text-white shadow-sm sm:px-6 lg:flex-nowrap lg:px-10">
 
-      <div className="flex-1 flex items-center">
+      <div className="flex min-w-fit flex-1 items-center">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="logo" className="h-10 object-contain" />
+          <img src={logo} alt="logo" className="h-9 object-contain sm:h-10" />
           <div className="hidden lg:block h-8 w-px bg-white/25"></div>
         </div>
       </div>
 
-      <div className="flex-1 flex  justify-end gap-2 text-sm font-medium">
+      <div className="order-3 flex w-full justify-center gap-2 text-sm font-medium sm:order-none sm:w-auto sm:flex-1 sm:justify-end">
         <NavLink to="/" className={navClass}>
           Cek plagiarisme
         </NavLink>
@@ -29,10 +29,10 @@ export default function Navbar() {
         </NavLink>
       </div>
 
-      <div className="flex-1 flex justify-end">
-        <div className="flex items-center gap-2 bg-white/15 border border-white/20 px-3 py-1.5 rounded-lg shadow-sm">
-          <div className="w-7 h-7 bg-white/80 rounded-full"></div>
-          <span className="text-sm font-medium">Bandung Techno Park</span>
+      <div className="flex min-w-fit flex-1 justify-end">
+        <div className="flex items-center gap-2 rounded-lg border border-white/20 bg-white/15 px-3 py-1.5 shadow-sm">
+          <div className="h-7 w-7 rounded-full bg-white/80"></div>
+          <span className="hidden text-sm font-medium sm:inline">Bandung Techno Park</span>
         </div>
       </div>
 

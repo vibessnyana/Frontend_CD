@@ -173,10 +173,10 @@ export default function MetadataPages() {
   };
 
   return (
-    <div className="w-full h-[calc(100vh-60px)] overflow-hidden bg-gray-100 flex flex-col">
-      <div className="h-full px-6 pt-5 pb-4 flex flex-col">
-        <div className="flex-1 mb-4 flex gap-4">
-          <div className="w-[360px] shrink-0">
+    <div className="w-full min-h-[calc(100vh-60px)] bg-gray-100">
+      <div className="mx-auto flex min-h-[calc(100vh-60px)] w-full max-w-[1920px] flex-col px-4 py-5 sm:px-6">
+        <div className="mb-4 flex flex-1 flex-col gap-4 lg:flex-row">
+          <div className="w-full shrink-0 lg:w-72 xl:w-[360px]">
             <SidebarFilter
               kategori={kategori}
               setKategori={setKategori}
@@ -187,17 +187,17 @@ export default function MetadataPages() {
             />
           </div>
 
-          <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <div className="mb-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search for Metadata Property"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none bg-gray-50 focus:bg-white focus:border-red-400"
+                className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm outline-none focus:border-red-400 focus:bg-white"
               />
             </div>
 
-            <div className="min-h-0 mb-4 p-4 inset-shadow-2xs rounded-xl border border-gray-100 bg-white">
+            <div className="mb-4 min-h-[320px] rounded-xl border border-gray-100 bg-white p-4 inset-shadow-2xs">
               <ItemGrid
                 data={currentData || []}
                 onSelect={handleSelect}
@@ -207,7 +207,7 @@ export default function MetadataPages() {
           </div>
         </div>
 
-        <div className="ml-[316px] -mt-3 h-10 shrink-0 flex items-center justify-center">
+        <div className="flex shrink-0 items-center justify-center pb-1">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

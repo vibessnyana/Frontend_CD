@@ -4,31 +4,31 @@ export default function ItemCard({ item, onSelect }) {
   return (
     <div
       onClick={() => onSelect(item)}
-      className="h-full bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition overflow-hidden"
+      className="min-h-[260px] cursor-pointer overflow-hidden rounded-xl bg-white p-4 shadow transition hover:shadow-md"
     >
       {item.image_url ? (
         <img
           src={item.image_url}
           alt={item["Judul KI"] || "Gambar metadata"}
-          className="h-[150px] w-full object-cover rounded-md mb-3 bg-gray-200"
+          className="mb-3 aspect-[4/3] w-full rounded-md bg-gray-200 object-cover"
         />
       ) : (
-        <div className="h-[150px] bg-gray-200 rounded-md mb-3"></div>
+        <div className="mb-3 aspect-[4/3] w-full rounded-md bg-gray-200"></div>
       )}
 
-      <h3 className="font-semibold text-sm mb-1 line-clamp-1">
+      <h3 className="mb-1 line-clamp-1 text-sm font-semibold leading-5 text-gray-700">
         {item["Judul KI"]}
       </h3>
 
-      <p className="text-xs text-gray-500 mb-2 line-clamp-1">
+      <p className="mb-2 line-clamp-1 text-xs leading-5 text-gray-500">
         {item.Deskripsi}
       </p>
 
-      <p className="text-xs">
+      <p className="line-clamp-1 text-xs leading-5 text-gray-500">
         <span className="font-semibold">Kategori:</span> {item.Kategori}
       </p>
 
-      <p className="text-xs">
+      <p className="line-clamp-1 text-xs leading-5 text-gray-500">
         <span className="font-semibold">Sub:</span>{" "}
         {item["Sub Kategori"]}
       </p>

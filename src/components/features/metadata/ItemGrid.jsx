@@ -2,9 +2,12 @@ import ItemCard from "./ItemCard.jsx";
 import SkeletonCard from "./SkeletonCard.jsx";
 
 export default function ItemGrid({ data, onSelect, loading }) {
+  const gridClass =
+    "grid grid-cols-1 justify-center gap-4 content-start sm:grid-cols-[repeat(auto-fill,minmax(210px,260px))] sm:justify-start";
+
   if (loading) {
     return (
-      <div className="grid grid-cols-5 grid-rows-2 auto-rows-[250px] gap-4 content-start">
+      <div className={gridClass}>
         {Array.from({ length: 10 }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -21,7 +24,7 @@ export default function ItemGrid({ data, onSelect, loading }) {
   }
 
   return (
-    <div className="grid grid-cols-5 grid-rows-2 auto-rows-[250px] gap-4 content-start">
+    <div className={gridClass}>
       {data.map((item) => (
         <ItemCard
           key={item._id}

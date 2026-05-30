@@ -1,16 +1,81 @@
-# React + Vite
+# Frontend Digital Copyright System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend ini digunakan untuk:
 
-Currently, two official plugins are available:
+- Upload gambar karya.
+- Melihat hasil cek kemiripan.
+- Melakukan review manual jika diperlukan.
+- Mendaftarkan metadata karya jika hasil pengecekan aman.
+- Melihat, mengubah, dan menghapus metadata karya.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## API
 
-## React Compiler
+Base URL dibaca dari `.env`:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```env
+VITE_API_BASE_URL=http://localhost:8080/api/v1
+```
 
-## Expanding the ESLint configuration
+Frontend hanya berkomunikasi dengan API Gateway.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Alur Plagiarisme
+
+1. User upload gambar.
+2. User memilih preset/manual threshold.
+3. Frontend memanggil `POST /upload`.
+4. Backend mengembalikan `check_id`, status registrasi, skor kemiripan, dan daftar kandidat internal/eksternal.
+5. Jika `allowed`, tombol verifikasi aktif.
+6. Jika `review_required`, reviewer dapat `Approve` atau `Reject`.
+7. Jika disetujui, form metadata dapat dikirim memakai `check_id`.
+
+## Form Metadata
+
+Form registrasi metadata tidak menampilkan `KI ID` dan `KI UUID`.
+
+Alasannya:
+
+- Field tersebut berasal dari database KI eksternal.
+- Saat ini belum dipakai sebagai sumber utama.
+- Sistem menggunakan `check_id` sebagai bukti hasil pengecekan dan anti-duplikasi registrasi.
+
+## Validasi Upload
+
+Validasi frontend:
+
+- Format: JPG, PNG, WEBP.
+- Ukuran maksimal: 10 MB.
+
+Validasi backend tetap menjadi validasi utama.
+
+## Error Handling
+
+Jika backend mengembalikan error `5xx`, frontend menampilkan pesan umum:
+
+```text
+Layanan sedang bermasalah. Silakan coba beberapa saat lagi.
+```
+
+Error validasi seperti `400`, `409`, dan `422` tetap menampilkan pesan yang berguna untuk user.
+
+## Development
+
+Install dependency:
+
+```bash
+npm install
+```
+
+Jalankan frontend:
+
+```bash
+npm run dev
+```
+
+Build production:
+
+```bash
+npm.cmd run build
+```
+
+Jika memakai PowerShell dan `npm` terkena execution policy, gunakan `npm.cmd`.
+

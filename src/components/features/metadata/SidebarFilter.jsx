@@ -9,7 +9,7 @@ export default function SidebarFilter({
   subKategoriList = [],
 }) {
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="mb-4">
         <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
           Refine
@@ -17,14 +17,14 @@ export default function SidebarFilter({
         <h2 className="text-base font-semibold text-gray-800">Filters</h2>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:grid-cols-1">
         <select
           value={kategori}
           onChange={(e) => {
             setKategori(e.target.value);
             setSubKategori("");
           }}
-          className="w-full border border-gray-200 bg-gray-50 px-3 py-2 rounded-md text-sm text-gray-600 outline-none focus:bg-white focus:border-red-400"
+          className="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 outline-none focus:border-red-400 focus:bg-white"
         >
           <option value="">Jenis Karya</option>
           {kategoriList.map((k, i) => (
@@ -35,7 +35,7 @@ export default function SidebarFilter({
         <select
           value={subKategori}
           onChange={(e) => setSubKategori(e.target.value)}
-          className="w-full border border-gray-200 bg-gray-50 px-3 py-2 rounded-md text-sm text-gray-600 outline-none focus:bg-white focus:border-red-400"
+          className="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 outline-none focus:border-red-400 focus:bg-white"
         >
           <option value="">Kategori</option>
           {subKategoriList.map((s, i) => (
@@ -43,7 +43,7 @@ export default function SidebarFilter({
           ))}
         </select>
 
-        <div className="flex justify-end pt-1">
+        <div className="flex justify-end sm:items-start lg:pt-1">
           <ButtonReset
             onClick={() => {
               setKategori("");
