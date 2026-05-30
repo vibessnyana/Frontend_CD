@@ -32,7 +32,30 @@ export default function MetadataPages() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  useEffect(() => {
+    const getColumnCount = () => {
+      const width = window.innerWidth;
+
+      if (width >= 1536) return 5;
+      if (width >= 1280) return 4;
+      if (width >= 1024) return 3;
+      if (width >= 640) return 2;
+
+      return 1;
+    };
+
+    const updateItemsPerPage = () => {
+      const rowsPerPage = 2;
+      setItemsPerPage(getColumnCount() * rowsPerPage);
+    };
+
+    updateItemsPerPage();
+    window.addEventListener("resize", updateItemsPerPage);
+
+    return () => window.removeEventListener("resize", updateItemsPerPage);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -110,6 +133,10 @@ export default function MetadataPages() {
   }, [search, kategori, subKategori]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, Math.max(totalPages, 1)));
+  }, [totalPages]);
 
   const currentData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,

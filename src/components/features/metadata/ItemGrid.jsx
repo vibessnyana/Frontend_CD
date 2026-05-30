@@ -3,7 +3,7 @@ import SkeletonCard from "./SkeletonCard.jsx";
 
 export default function ItemGrid({ data, onSelect, loading }) {
   const gridClass =
-    "grid grid-cols-1 justify-center gap-4 content-start sm:grid-cols-[repeat(auto-fill,minmax(210px,260px))] sm:justify-start";
+    "grid grid-cols-1 gap-4 content-start sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
 
   if (loading) {
     return (

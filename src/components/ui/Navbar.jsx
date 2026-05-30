@@ -3,10 +3,10 @@ import logo from "../../assets/logo1.png";
 
 export default function Navbar() {
   const navClass = ({ isActive }) =>
-    `px-4 py-2 rounded-lg cursor-pointer transition ${
+    `flex-1 rounded-lg px-3 py-2 text-center transition sm:flex-none sm:px-4 ${
       isActive
-        ? "bg-white/15 text-white/90 shadow-sm"
-        : "text-white/90 hover:bg-white/15 hover:text-white"
+        ? "bg-white/20 text-white shadow-sm"
+        : "text-white/85 hover:bg-white/15 hover:text-white"
     }`;
 
   return (
@@ -19,7 +19,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      <div className="order-3 flex w-full justify-center gap-2 text-sm font-medium sm:order-none sm:w-auto sm:flex-1 sm:justify-end">
+      <div className="order-3 flex w-full rounded-xl bg-red-700/25 p-1 text-sm font-medium sm:order-none sm:w-auto sm:flex-1 sm:justify-end sm:gap-2 sm:bg-transparent sm:p-0">
         <NavLink to="/" className={navClass}>
           Cek plagiarisme
         </NavLink>

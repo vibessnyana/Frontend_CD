@@ -139,11 +139,11 @@ export default function PlagiarismPages() {
   };
 
   return (
-    <div className="w-full h-[calc(100vh-60px)] overflow-hidden bg-gray-100 flex flex-col">
+    <div className="flex min-h-[calc(100vh-60px)] w-full flex-col bg-gray-100">
       {/* CONTENT */}
       <div
         className={`
-          flex-1 flex flex-col items-center px-6 py-6
+          flex-1 flex flex-col items-center px-5 py-6 sm:px-6
           transition duration-200
           ${isModalOpen ? "blur-sm scale-[0.99]" : ""}
         `}

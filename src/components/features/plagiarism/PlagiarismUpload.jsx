@@ -41,7 +41,7 @@ export default function PlagiarismUpload({ preview, setFile, setPreview }) {
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={`
-        w-full h-[400px]
+        w-full h-[320px] sm:h-[400px]
         rounded-2xl border-2 border-dashed
         flex items-center justify-center
         cursor-pointer transition-all duration-200
