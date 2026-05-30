@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonSave from "../../ui/Button/ButtonSave.jsx";
@@ -14,21 +14,19 @@ function Row({ label, children }) {
   );
 }
 
-export default function MetadataEditor({ data, onSave, onCancel }) {
-  const [form, setForm] = useState({});
+function buildInitialForm(data) {
+  return {
+    "Judul KI": data?.["Judul KI"] || "",
+    Deskripsi: data?.Deskripsi || "",
+    Kategori: data?.Kategori || "",
+    "Sub Kategori": data?.["Sub Kategori"] || "",
+    "Kategori HC": data?.["Kategori HC"] || "",
+    "Sub Kategori HC": data?.["Sub Kategori HC"] || "",
+  };
+}
 
-  useEffect(() => {
-    if (data) {
-      setForm({
-        "Judul KI": data["Judul KI"] || "",
-        Deskripsi: data.Deskripsi || "",
-        Kategori: data.Kategori || "",
-        "Sub Kategori": data["Sub Kategori"] || "",
-        "Kategori HC": data["Kategori HC"] || "",
-        "Sub Kategori HC": data["Sub Kategori HC"] || "",
-      });
-    }
-  }, [data]);
+export default function MetadataEditor({ data, onSave, onCancel }) {
+  const [form, setForm] = useState(() => buildInitialForm(data));
 
   const handleChange = (field, value) => {
     setForm((prev) => ({

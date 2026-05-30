@@ -22,7 +22,6 @@ function mapSimilarityItem(item) {
 export default function PlagiarismVerification({
   preview,
   resultPercent,
-  threshold,
   result,
   onVerify,
   onCancel,
