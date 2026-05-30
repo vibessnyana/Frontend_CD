@@ -200,9 +200,9 @@ export default function MetadataPages() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-60px)] bg-gray-100">
-      <div className="mx-auto flex min-h-[calc(100vh-60px)] w-full max-w-[1920px] flex-col px-4 py-5 sm:px-6">
-        <div className="mb-4 flex flex-1 flex-col gap-4 lg:flex-row">
+    <div className="min-h-[calc(100vh-60px)] w-full bg-gray-100">
+      <div className="mx-auto w-full max-w-[1920px] px-4 py-5 sm:px-6">
+        <div className="mb-4 flex flex-col gap-4 lg:flex-row">
           <div className="w-full shrink-0 lg:w-72 xl:w-[360px]">
             <SidebarFilter
               kategori={kategori}
@@ -234,7 +234,7 @@ export default function MetadataPages() {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center justify-center pb-1">
+        <div className="flex items-center justify-center pb-1">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
