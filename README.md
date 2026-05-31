@@ -47,6 +47,18 @@ Validasi frontend:
 
 Validasi backend tetap menjadi validasi utama.
 
+## Responsiveness
+
+Beberapa bagian UI sudah disesuaikan agar tetap nyaman dipakai pada ukuran layar berbeda dan saat browser di-zoom:
+
+- Navbar menyesuaikan layar kecil.
+- Halaman upload memakai tinggi minimum agar konten tetap dapat discroll di viewport kecil.
+- Dropzone upload lebih pendek di mobile dan tetap lebih luas di desktop.
+- Grid metadata memakai jumlah kolom adaptif.
+- Jumlah item metadata per halaman mengikuti jumlah kolom agar daftar tidak memanjang terlalu jauh.
+- Card metadata memakai `object-contain` agar gambar karya tidak terpotong.
+- Pagination metadata mengikuti tinggi konten, bukan terdorong ke bawah viewport.
+
 ## Error Handling
 
 Jika backend mengembalikan error `5xx`, frontend menampilkan pesan umum:
@@ -78,4 +90,19 @@ npm.cmd run build
 ```
 
 Jika memakai PowerShell dan `npm` terkena execution policy, gunakan `npm.cmd`.
+
+## Quality Check
+
+Sebelum commit atau demo, jalankan:
+
+```bash
+npm.cmd run lint
+npm.cmd run build
+```
+
+`lint` memastikan tidak ada error static analysis seperti variable tidak terpakai. `build` memastikan aplikasi dapat dibuat untuk production.
+
+## Catatan Improvement
+
+Beberapa validasi frontend masih memakai `alert()`. Secara fungsi sudah berjalan, tetapi untuk tampilan yang lebih konsisten dapat diganti menjadi modal atau toast error.
 

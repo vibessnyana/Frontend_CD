@@ -8,10 +8,12 @@ export default function App() {
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<PlagiarismPages />} />
-        <Route path="/metadata" element={<MetadataPages />} />
-      </Routes>
+      <main>
+        <Routes>
+          <Route path="/" element={<PlagiarismPages />} />
+          <Route path="/metadata" element={<MetadataPages />} />
+        </Routes>
+      </main>
     </>
   );
 }
