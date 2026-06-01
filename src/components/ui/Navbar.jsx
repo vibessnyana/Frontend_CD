@@ -14,7 +14,7 @@ export default function Navbar() {
 
       <div className="flex min-w-fit flex-1 items-center">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="logo" className="h-9 object-contain sm:h-10" />
+          <img src={logo} alt="logo" width="120" height="43" className="h-9 object-contain sm:h-10" />
           <div className="hidden lg:block h-8 w-px bg-white/25"></div>
         </div>
       </div>

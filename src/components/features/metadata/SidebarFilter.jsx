@@ -19,6 +19,7 @@ export default function SidebarFilter({
 
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:grid-cols-1">
         <select
+          aria-label="filter jenis karya"
           value={kategori}
           onChange={(e) => {
             setKategori(e.target.value);
@@ -33,6 +34,7 @@ export default function SidebarFilter({
         </select>
 
         <select
+          aria-label="filter kategori"
           value={subKategori}
           onChange={(e) => setSubKategori(e.target.value)}
           className="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 outline-none focus:border-red-400 focus:bg-white"
