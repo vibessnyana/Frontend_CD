@@ -1,6 +1,21 @@
-import Modal from "../../ui/Modal.jsx";
+﻿import Modal from "../../ui/Modal.jsx";
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonAction from "../../ui/Button/ButtonAction.jsx";
+
+function getScoreColor(riskLevel) {
+  switch (riskLevel) {
+    case "high":
+      return "text-red-600";
+    case "medium":
+      return "text-orange-500";
+    case "low":
+      return "text-yellow-600";
+    case "very_low":
+      return "text-green-600";
+    default:
+      return "text-gray-700";
+  }
+}
 
 export default function PlagiarismResult({
   resultPercent,
@@ -9,15 +24,15 @@ export default function PlagiarismResult({
   onDetail,
 }) {
   const riskLevel = result?.decision_result?.decision?.risk_level;
+  const normalizedRiskLevel = String(riskLevel || "unknown").toLowerCase();
   const requiresReview = result?.decision_result?.decision?.requires_review;
-  const canRegister = Boolean(result?.can_register);
   const registrationStatus = result?.registration_status;
-  const statusColor = canRegister ? "text-green-600" : "text-red-500";
+  const scoreColor = getScoreColor(normalizedRiskLevel);
 
   return (
     <Modal>
       <div className="flex flex-col items-center text-center">
-        <h1 className={`text-5xl font-bold mb-2 ${statusColor}`}>
+        <h1 className={`text-5xl font-bold mb-2 ${scoreColor}`}>
           {resultPercent}%
         </h1>
 
@@ -52,3 +67,5 @@ export default function PlagiarismResult({
     </Modal>
   );
 }
+
+
