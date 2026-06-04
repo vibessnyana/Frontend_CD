@@ -1,4 +1,4 @@
-import ItemCard from "./ItemCard.jsx";
+﻿import ItemCard from "./ItemCard.jsx";
 import SkeletonCard from "./SkeletonCard.jsx";
 
 export default function ItemGrid({ data, onSelect, loading }) {
@@ -25,13 +25,16 @@ export default function ItemGrid({ data, onSelect, loading }) {
 
   return (
     <div className={gridClass}>
-      {data.map((item) => (
+      {data.map((item, index) => (
         <ItemCard
           key={item._id}
           item={item}
           onSelect={onSelect}
+          priority={index < 2}
         />
       ))}
     </div>
   );
 }
+
+

@@ -1,6 +1,14 @@
-import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
+﻿import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonAction from "../../ui/Button/ButtonAction.jsx";
 import ButtonDelete from "../../ui/Button/ButtonDelete.jsx";
+
+function getCloudinaryPreviewUrl(url) {
+  if (!url || !url.includes("res.cloudinary.com") || !url.includes("/image/upload/")) {
+    return url;
+  }
+
+  return url.replace("/image/upload/", "/image/upload/f_auto,q_auto,w_900,c_fit/");
+}
 
 function Row({ label, value }) {
   return (
@@ -33,8 +41,11 @@ export default function PreviewModal({
         {data.image_url ? (
           <div className="w-full max-h-[350px] rounded-lg mb-4 bg-white flex items-center justify-center overflow-hidden">
             <img
-              src={data.image_url}
+              src={getCloudinaryPreviewUrl(data.image_url)}
               alt={data["Judul KI"] || "Gambar metadata"}
+              width="900"
+              height="600"
+              decoding="async"
               className="w-full max-h-[350px] object-contain"
             />
           </div>
@@ -52,7 +63,7 @@ export default function PreviewModal({
         <Row label="Kategori HC" value={data["Kategori HC"]} />
         <Row label="Sub Kategori HC" value={data["Sub Kategori HC"]} />
 
-        {/* 🔥 BUTTON */}
+        {/* ðŸ”¥ BUTTON */}
         <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
 
           <ButtonCancel onClick={onClose}>
@@ -74,3 +85,5 @@ export default function PreviewModal({
     </div>
   );
 }
+
+
