@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 
 import SidebarFilter from "../components/features/metadata/SidebarFilter.jsx";
 import ItemGrid from "../components/features/metadata/ItemGrid.jsx";
@@ -220,7 +220,7 @@ export default function MetadataPages() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search for Metadata Property"
-                className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm outline-none focus:border-red-400 focus:bg-white"
+                className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-700 placeholder:text-gray-600 outline-none focus:border-red-500 focus:bg-white"
               />
             </div>
 
@@ -295,3 +295,4 @@ export default function MetadataPages() {
     </div>
   );
 }
+

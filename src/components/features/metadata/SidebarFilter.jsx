@@ -1,4 +1,4 @@
-import ButtonReset from "../../ui/Button/ButtonReset.jsx";
+﻿import ButtonReset from "../../ui/Button/ButtonReset.jsx";
 
 export default function SidebarFilter({
   kategori = "",
@@ -11,7 +11,7 @@ export default function SidebarFilter({
   return (
     <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="mb-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+        <p className="text-xs font-medium uppercase tracking-wide text-gray-600">
           Refine
         </p>
         <h2 className="text-base font-semibold text-gray-800">Filters</h2>
@@ -60,3 +60,4 @@ export default function SidebarFilter({
     </div>
   );
 }
+
