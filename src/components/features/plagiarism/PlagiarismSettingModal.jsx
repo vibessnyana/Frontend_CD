@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonCekPlagiarisme from "../../ui/Button/ButtonCekPlagiarisme.jsx";
@@ -21,10 +21,10 @@ export default function PlagiarismSettingModal({
     sensitive: { high: 80, medium: 65, low: 50 },
   };
 
-  const formatThresholdRange = ({ high, medium }) =>
+  const formatThresholdRange = ({ high, medium, low }) =>
     `High: 100% - ${high}% | Medium: ${high - 1}% - ${medium}% | Low: ${
       medium - 1
-    }% - 1%`;
+    }% - ${low}% | Very Low: ${low - 1}% - 0%`;
 
   const handleSubmit = () => {
     if (preset) {
@@ -120,7 +120,7 @@ export default function PlagiarismSettingModal({
             </select>
 
             {preset && (
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="mt-2 text-xs leading-relaxed text-gray-600">
                 {formatThresholdRange(presets[preset])}
               </p>
             )}
@@ -176,3 +176,4 @@ export default function PlagiarismSettingModal({
     </div>
   );
 }
+

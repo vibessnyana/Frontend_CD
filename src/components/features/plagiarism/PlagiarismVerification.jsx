@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonAction from "../../ui/Button/ButtonAction.jsx";
 import SimilarityList from "./SimilarityList.jsx";
@@ -19,6 +19,36 @@ function mapSimilarityItem(item) {
   };
 }
 
+function getScoreColor(riskLevel) {
+  switch (riskLevel) {
+    case "high":
+      return "text-red-600";
+    case "medium":
+      return "text-orange-500";
+    case "low":
+      return "text-yellow-600";
+    case "very_low":
+      return "text-green-600";
+    default:
+      return "text-gray-700";
+  }
+}
+
+function getRiskBadgeClass(riskLevel) {
+  switch (riskLevel) {
+    case "high":
+      return "bg-red-50 text-red-700";
+    case "medium":
+      return "bg-orange-50 text-orange-700";
+    case "low":
+      return "bg-yellow-50 text-yellow-700";
+    case "very_low":
+      return "bg-green-50 text-green-700";
+    default:
+      return "bg-white text-gray-600";
+  }
+}
+
 export default function PlagiarismVerification({
   preview,
   resultPercent,
@@ -37,6 +67,7 @@ export default function PlagiarismVerification({
   const normalizedRegistrationStatus = String(registrationStatus || "").toLowerCase();
   const registrationReason = result?.registration_reason;
   const riskLevel = decision?.risk_level || "unknown";
+  const normalizedRiskLevel = String(riskLevel).toLowerCase();
   const requiresReview = Boolean(decision?.requires_review);
   const needsReview = normalizedRegistrationStatus === "review_required" || requiresReview;
   const isReviewRequired = normalizedRegistrationStatus === "review_required";
@@ -46,11 +77,7 @@ export default function PlagiarismVerification({
       ? "Perlu Review"
       : "Tidak Dapat Diverifikasi"
     : "Dapat Diverifikasi";
-  const scoreColor = !canRegister
-    ? needsReview
-      ? "text-yellow-600"
-      : "text-red-500"
-    : "text-green-600";
+  const scoreColor = getScoreColor(normalizedRiskLevel);
   const statusClass = !canRegister
     ? needsReview
       ? "bg-yellow-50 text-yellow-700 border-yellow-100"
@@ -158,7 +185,7 @@ export default function PlagiarismVerification({
             <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs text-gray-600">
               <div className="mb-1 flex items-center justify-between gap-3">
                 <p className="font-semibold text-gray-700">Keputusan Sistem</p>
-                <span className="rounded-md bg-white px-2 py-1 font-medium capitalize text-gray-600">
+                <span className={`rounded-md px-2 py-1 font-medium capitalize ${getRiskBadgeClass(normalizedRiskLevel)}`}>
                   {riskLevel}
                 </span>
               </div>
@@ -202,6 +229,7 @@ export default function PlagiarismVerification({
     </div>
   );
 }
+
 
 
 
