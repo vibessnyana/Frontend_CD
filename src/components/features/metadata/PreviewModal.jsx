@@ -42,7 +42,20 @@ export default function PreviewModal({
       <div className="h-[80vh] overflow-y-auto p-6">
         <h2 className="text-lg font-semibold mb-4">Detail Metadata</h2>
 
-        <div className="w-full h-[180px] bg-gray-200 rounded-lg mb-4"></div>
+        {data.image_url ? (
+          <div className="w-full max-h-[350px] rounded-lg mb-4 bg-white flex items-center justify-center overflow-hidden">
+            <img
+              src={getCloudinaryPreviewUrl(data.image_url)}
+              alt={data["Judul KI"] || "Gambar metadata"}
+              width="900"
+              height="600"
+              decoding="async"
+              className="w-full max-h-[350px] object-contain"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-[180px] bg-gray-200 rounded-lg mb-4"></div>
+        )}
 
         <Row label="Judul" value={data["Judul KI"]} />
         <Row label="Deskripsi" value={data.Deskripsi} />
@@ -74,5 +87,3 @@ export default function PreviewModal({
     </div>
   );
 }
-
-

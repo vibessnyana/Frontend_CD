@@ -104,24 +104,6 @@ export default function PlagiarismForm({
 
         <div className="space-y-4 max-h-[420px] overflow-y-auto px-2">
           <div>
-            <label className="label">ID</label>
-            <input className="input-compact" />
-          </div>
-
-          {/* KI ID */}
-          <div>
-            <label className="label">KI ID</label>
-            <input className="input-compact" />
-          </div>
-
-          {/* KI UUID */}
-          <div>
-            <label className="label">KI UUID</label>
-            <input className="input-compact break-words" />
-          </div>
-
-          {/* JUDUL */}
-          <div>
             <label className="label">Judul</label>
             <textarea
               className="textarea-compact"
@@ -189,4 +171,3 @@ export default function PlagiarismForm({
     </div>
   );
 }
-
