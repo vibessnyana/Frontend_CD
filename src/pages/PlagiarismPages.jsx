@@ -58,6 +58,8 @@ function getRegisteredImageUrl(response) {
     response?.data?.imageUrl ||
     response?.metadata?.image_url ||
     response?.metadata?.imageUrl ||
+    response?.item?.image_url ||
+    response?.item?.imageUrl ||
     ""
   );
 }
@@ -114,12 +116,7 @@ export default function PlagiarismPages() {
           metadataId,
           checkId: metadataPayload.check_id,
           title: metadataPayload.title,
-          imageUrl:
-            registeredImageUrl ||
-            report.uploaded_image_url ||
-            report.image_url ||
-            preview ||
-            "",
+          imageUrl: registeredImageUrl,
           report,
         });
       }
@@ -216,7 +213,6 @@ export default function PlagiarismPages() {
       setStatus("result");
     } catch (err) {
       setErrorMessage(err.message || "Gagal mengecek plagiarisme");
-      setErrorMessage(err.message || "Gagal mengecek plagiarisme");
       setStatus("error");
     }
   };
@@ -255,16 +251,17 @@ export default function PlagiarismPages() {
                 </span>
               </p>
 
-            <ButtonAction
-              onClick={() => {
-                if (!file) return alert("Upload gambar dulu!");
-                setStatus("setting");
-              }}
-              className="!bg-red-500 hover:!bg-red-600"
-            >
-              Cek Plagiarisme
-            </ButtonAction>
-          </>
+              <ButtonAction
+                onClick={() => {
+                  if (!file) return alert("Upload gambar dulu!");
+                  setStatus("setting");
+                }}
+                className="!bg-red-500 hover:!bg-red-600 sm:min-w-[170px]"
+              >
+                Cek Plagiarisme
+              </ButtonAction>
+            </div>
+          </div>
         )}
       </div>
 
@@ -308,7 +305,6 @@ export default function PlagiarismPages() {
           preview={preview}
           onCancel={() => setStatus("idle")}
           onCheck={handleCheck}
-          onCheck={handleCheck}
         />
       )}
 
@@ -336,5 +332,3 @@ export default function PlagiarismPages() {
     </div>
   );
 }
-
-
