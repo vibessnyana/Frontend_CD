@@ -41,21 +41,10 @@ function getMetadataArray(result) {
       if (Array.isArray(firstItem.payload)) return firstItem.payload;
 
       if (Array.isArray(firstItem.payload?.data)) return firstItem.payload.data;
-      if (Array.isArray(firstItem.payload?.items)) {
-        return firstItem.payload.items;
-      }
-
-      if (Array.isArray(firstItem.payload?.metadata)) {
-        return firstItem.payload.metadata;
-      }
-
-      if (Array.isArray(firstItem.payload?.results)) {
-        return firstItem.payload.results;
-      }
-
-      if (Array.isArray(firstItem.payload?.records)) {
-        return firstItem.payload.records;
-      }
+      if (Array.isArray(firstItem.payload?.items)) return firstItem.payload.items;
+      if (Array.isArray(firstItem.payload?.metadata)) return firstItem.payload.metadata;
+      if (Array.isArray(firstItem.payload?.results)) return firstItem.payload.results;
+      if (Array.isArray(firstItem.payload?.records)) return firstItem.payload.records;
     }
 
     return result;
@@ -103,19 +92,6 @@ function getMetadataObject(result) {
   return result;
 }
 
-function getReportObject(item) {
-  return (
-    item?.report ??
-    item?.plagiarism_report ??
-    item?.plagiarismReport ??
-    item?.similarity_report ??
-    item?.similarityReport ??
-    item?.check_result ??
-    item?.checkResult ??
-    null
-  );
-}
-
 function normalizeMetadata(item, index = 0) {
   return {
     ...item,
@@ -132,11 +108,20 @@ function normalizeMetadata(item, index = 0) {
 
     No: item.No ?? item.no ?? index + 1,
 
-    check_id: item.check_id ?? item.checkId ?? item.checkID ?? "",
+    check_id: item.check_id ?? "",
 
-    ki_id: item.ki_id ?? item.kiId ?? item.id_ki ?? item.idKI ?? "",
+    ki_id:
+      item.ki_id ??
+      item.kiId ??
+      item.id_ki ??
+      item.idKI ??
+      "",
 
-    ki_uuid: item.ki_uuid ?? item.kiUuid ?? item.uuid ?? "",
+    ki_uuid:
+      item.ki_uuid ??
+      item.kiUuid ??
+      item.uuid ??
+      "",
 
     "Judul KI":
       item["Judul KI"] ??
@@ -191,32 +176,27 @@ function normalizeMetadata(item, index = 0) {
       item.copyright_sub_category ??
       "",
 
-    image_url: item.image_url ?? item.imageUrl ?? item.image ?? item.gambar ?? "",
+    image_url:
+      item.image_url ??
+      item.imageUrl ??
+      item.image ??
+      item.gambar ??
+      "",
 
     cloudinary_public_id:
-      item.cloudinary_public_id ?? item.cloudinaryPublicId ?? "",
+      item.cloudinary_public_id ??
+      item.cloudinaryPublicId ??
+      "",
 
-    report: getReportObject(item),
-    report_saved_at: item.report_saved_at ?? item.reportSavedAt ?? null,
+    report: item.report ?? null,
+    report_saved_at: item.report_saved_at ?? null,
   };
 }
 
 function normalizeReportResponse(result, fallbackMetadata = null) {
   const reportObject = getMetadataObject(result);
 
-  if (!reportObject) {
-    return fallbackMetadata;
-  }
-
-  const report =
-    reportObject.report ??
-    reportObject.plagiarism_report ??
-    reportObject.plagiarismReport ??
-    reportObject.similarity_report ??
-    reportObject.similarityReport ??
-    reportObject.check_result ??
-    reportObject.checkResult ??
-    null;
+  if (!reportObject) return fallbackMetadata;
 
   return {
     ...(fallbackMetadata || {}),
@@ -225,15 +205,10 @@ function normalizeReportResponse(result, fallbackMetadata = null) {
       reportObject._id ??
         reportObject.id ??
         reportObject.metadata_id ??
-        reportObject.metadataId ??
         fallbackMetadata?._id ??
         ""
     ),
-    check_id:
-      reportObject.check_id ??
-      reportObject.checkId ??
-      fallbackMetadata?.check_id ??
-      "",
+    check_id: reportObject.check_id ?? fallbackMetadata?.check_id ?? "",
     title:
       reportObject.title ??
       reportObject["Judul KI"] ??
@@ -241,13 +216,11 @@ function normalizeReportResponse(result, fallbackMetadata = null) {
       "",
     image_url:
       reportObject.image_url ??
-      reportObject.imageUrl ??
       fallbackMetadata?.image_url ??
       "",
-    report,
+    report: reportObject.report ?? null,
     report_saved_at:
       reportObject.report_saved_at ??
-      reportObject.reportSavedAt ??
       fallbackMetadata?.report_saved_at ??
       null,
   };
@@ -255,23 +228,43 @@ function normalizeReportResponse(result, fallbackMetadata = null) {
 
 function toBackendPayload(data) {
   return {
-    title: data["Judul KI"] ?? data.title ?? "",
+    title:
+      data["Judul KI"] ??
+      data.title ??
+      "",
 
-    description: data.Deskripsi ?? data.description ?? "",
+    description:
+      data.Deskripsi ??
+      data.description ??
+      "",
 
-    category: data.Kategori ?? data.category ?? "",
+    category:
+      data.Kategori ??
+      data.category ??
+      "",
 
-    sub_category: data["Sub Kategori"] ?? data.sub_category ?? "",
+    sub_category:
+      data["Sub Kategori"] ??
+      data.sub_category ??
+      "",
 
     copyright_category:
-      data["Kategori HC"] ?? data.copyright_category ?? "",
+      data["Kategori HC"] ??
+      data.copyright_category ??
+      "",
 
     copyright_sub_category:
-      data["Sub Kategori HC"] ?? data.copyright_sub_category ?? "",
+      data["Sub Kategori HC"] ??
+      data.copyright_sub_category ??
+      "",
 
-    image_url: data.image_url ?? "",
+    image_url:
+      data.image_url ??
+      "",
 
-    cloudinary_public_id: data.cloudinary_public_id ?? "",
+    cloudinary_public_id:
+      data.cloudinary_public_id ??
+      "",
   };
 }
 
@@ -288,46 +281,25 @@ export async function getMetadataList() {
 
   const metadataList = getMetadataArray(result);
 
-  return metadataList.map((item, index) => normalizeMetadata(item, index));
+  const normalizedData = metadataList.map((item, index) =>
+    normalizeMetadata(item, index)
+  );
+  return normalizedData;
 }
 
 export async function getMetadataReport(metadataId) {
-  const reportResponse = await fetch(
-    `${API_BASE_URL}/metadata/${metadataId}/report`,
-    {
-      method: "GET",
-    }
-  );
-
-  if (reportResponse.ok) {
-    const result = await reportResponse.json().catch(() => null);
-    return normalizeReportResponse(result);
-  }
-
-  if (![404, 405].includes(reportResponse.status)) {
-    await throwRequestError(reportResponse, "Gagal mengambil report metadata");
-  }
-
-  const metadataResponse = await fetch(`${API_BASE_URL}/metadata/${metadataId}`, {
+  const response = await fetch(`${API_BASE_URL}/metadata/${metadataId}/report`, {
     method: "GET",
   });
 
-  if (!metadataResponse.ok) {
-    if ([404, 405].includes(metadataResponse.status)) {
-      return null;
-    }
+  if (!response.ok) {
+    if ([404, 405].includes(response.status)) return null;
 
-    await throwRequestError(metadataResponse, "Gagal mengambil report metadata");
+    await throwRequestError(response, "Gagal mengambil report metadata");
   }
 
-  const result = await metadataResponse.json().catch(() => null);
-  const metadataObject = getMetadataObject(result);
-
-  if (!metadataObject) {
-    return null;
-  }
-
-  return normalizeMetadata(metadataObject);
+  const result = await response.json().catch(() => null);
+  return normalizeReportResponse(result);
 }
 
 export async function saveMetadataReport(metadataId, payload) {

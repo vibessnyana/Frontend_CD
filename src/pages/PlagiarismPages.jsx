@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import ButtonAction from "../components/ui/Button/ButtonAction.jsx";
 
 import PlagiarismUpload from "../components/features/plagiarism/PlagiarismUpload.jsx";
@@ -10,25 +9,7 @@ import PlagiarismSettingModal from "../components/features/plagiarism/Plagiarism
 import LoadingModal from "../components/features/plagiarism/LoadingModal.jsx";
 import SuccessModal from "../components/features/plagiarism/SuccessModal.jsx";
 import ErrorModal from "../components/features/plagiarism/ErrorModal.jsx";
-
-import {
-  approveReviewCheck,
-  checkPlagiarism,
-  registerMetadata,
-  rejectReviewCheck,
-} from "../services/PlagiarismService.jsx";
-
-function normalizePercent(value) {
-  return Number((Number(value || 0) * 100).toFixed(2));
-}
-
-function toDecimalThresholds(value) {
-  return {
-    high: Number(value.high) / 100,
-    medium: Number(value.medium) / 100,
-    low: Number(value.low) / 100,
-  };
-}
+import { approveReviewCheck, checkPlagiarism, registerMetadata, rejectReviewCheck } from "../services/PlagiarismService.jsx";
 
 export default function PlagiarismPages() {
   const [status, setStatus] = useState("idle");
@@ -45,9 +26,7 @@ export default function PlagiarismPages() {
 
   useEffect(() => {
     return () => {
-      if (preview) {
-        URL.revokeObjectURL(preview);
-      }
+      if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
@@ -60,7 +39,6 @@ export default function PlagiarismPages() {
     "success",
     "error",
   ];
-
   const isModalOpen = modalStatuses.includes(status);
   const fileName = file?.name || "Belum ada file dipilih";
 
@@ -70,9 +48,7 @@ export default function PlagiarismPages() {
     try {
       setIsSavingMetadata(true);
       setErrorMessage("");
-
       const response = await registerMetadata(metadataPayload);
-
       setRegistrationResult(response);
       setStatus("success");
     } catch (err) {
@@ -95,21 +71,24 @@ export default function PlagiarismPages() {
     setErrorMessage("");
   };
 
+  const normalizePercent = (value) => Number((Number(value || 0) * 100).toFixed(2));
+
+  const toDecimalThresholds = (value) => ({
+    high: Number(value.high) / 100,
+    medium: Number(value.medium) / 100,
+    low: Number(value.low) / 100,
+  });
+
   const handleApproveReview = async () => {
     try {
       if (!plagiarismResult?.check_id) return;
-
       setErrorMessage("");
-
       const response = await approveReviewCheck(plagiarismResult.check_id);
-
       setPlagiarismResult((current) => ({
         ...current,
         can_register: true,
         registration_status: "allowed",
-        registration_reason:
-          response.message ||
-          "Hasil review disetujui. Metadata dapat didaftarkan.",
+        registration_reason: response.message || "Hasil review disetujui. Metadata dapat didaftarkan.",
         manual_review_status: response.manual_review_status,
         manual_review_reason: response.manual_review_reason,
       }));
@@ -122,18 +101,13 @@ export default function PlagiarismPages() {
   const handleRejectReview = async () => {
     try {
       if (!plagiarismResult?.check_id) return;
-
       setErrorMessage("");
-
       const response = await rejectReviewCheck(plagiarismResult.check_id);
-
       setPlagiarismResult((current) => ({
         ...current,
         can_register: false,
         registration_status: "blocked",
-        registration_reason:
-          response.message ||
-          "Hasil review ditolak. Metadata tidak dapat didaftarkan.",
+        registration_reason: response.message || "Hasil review ditolak. Metadata tidak dapat didaftarkan.",
         manual_review_status: response.manual_review_status,
         manual_review_reason: response.manual_review_reason,
       }));
@@ -142,11 +116,9 @@ export default function PlagiarismPages() {
       setStatus("error");
     }
   };
-
   const handleCheck = async (data) => {
     try {
       const selectedThreshold = data.value?.high || 0;
-
       setThreshold(Number(selectedThreshold));
       setErrorMessage("");
       setStatus("loading");
@@ -154,12 +126,9 @@ export default function PlagiarismPages() {
       const response = await checkPlagiarism({
         file,
         preset: data.type === "preset" ? data.preset : null,
-        thresholds:
-          data.type === "manual" ? toDecimalThresholds(data.value) : null,
+        thresholds: data.type === "manual" ? toDecimalThresholds(data.value) : null,
       });
-
       const score = response?.similarity_result?.overall_score || 0;
-
       setPlagiarismResult(response);
       setResultPercent(normalizePercent(score));
       setStatus("result");
@@ -171,6 +140,7 @@ export default function PlagiarismPages() {
 
   return (
     <div className="flex min-h-[calc(100vh-60px)] w-full flex-col bg-gray-100">
+      {/* CONTENT */}
       <div
         className={`
           flex-1 flex flex-col items-center px-5 py-6 sm:px-6
@@ -183,10 +153,14 @@ export default function PlagiarismPages() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="mt-1 text-sm text-gray-500">
-                  Upload gambar karya untuk memeriksa kemiripan internal dan
-                  eksternal.
+                  Upload gambar karya untuk memeriksa kemiripan internal dan eksternal.
                 </p>
               </div>
+
+              {/* <div className="rounded-lg bg-white px-4 py-2 text-right shadow-sm border border-gray-100">
+                <p className="text-xs text-gray-400">Medium threshold</p>
+                <p className="text-sm font-semibold text-gray-700">{threshold}%</p>
+              </div> */}
             </div>
 
             <PlagiarismUpload
@@ -197,10 +171,7 @@ export default function PlagiarismPages() {
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-full truncate text-sm text-gray-500">
-                File:{" "}
-                <span className="font-medium text-gray-700">
-                  {fileName}
-                </span>
+                File: <span className="font-medium text-gray-700">{fileName}</span>
               </p>
 
               <ButtonAction
@@ -217,10 +188,12 @@ export default function PlagiarismPages() {
         )}
       </div>
 
+      {/* OVERLAY */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/35 z-40 animate-modal-backdrop"></div>
       )}
 
+      {/* DETAIL */}
       {status === "detail" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 animate-modal-panel">
           <PlagiarismVerification
@@ -228,9 +201,7 @@ export default function PlagiarismPages() {
             resultPercent={resultPercent}
             threshold={threshold}
             result={plagiarismResult}
-            onVerify={() =>
-              plagiarismResult?.can_register && setStatus("form")
-            }
+            onVerify={() => plagiarismResult?.can_register && setStatus("form")}
             onCancel={() => setStatus("idle")}
             onApproveReview={handleApproveReview}
             onRejectReview={handleRejectReview}
@@ -238,13 +209,13 @@ export default function PlagiarismPages() {
         </div>
       )}
 
+      {/* FORM */}
       {status === "form" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 animate-modal-panel">
           <PlagiarismForm
             checkId={plagiarismResult?.check_id}
             report={plagiarismResult}
             resultPercent={resultPercent}
-            preview={preview}
             onSubmit={handleSave}
             onCancel={() => setStatus("idle")}
             isSubmitting={isSavingMetadata}
@@ -252,6 +223,7 @@ export default function PlagiarismPages() {
         </div>
       )}
 
+      {/* SETTING */}
       {status === "setting" && (
         <PlagiarismSettingModal
           preview={preview}
@@ -260,8 +232,10 @@ export default function PlagiarismPages() {
         />
       )}
 
+      {/* LOADING */}
       {status === "loading" && <LoadingModal />}
 
+      {/* RESULT */}
       {status === "result" && (
         <PlagiarismResult
           resultPercent={resultPercent}
@@ -271,10 +245,12 @@ export default function PlagiarismPages() {
         />
       )}
 
+      {/* SUCCESS */}
       {status === "success" && (
         <SuccessModal onClose={handleResetFlow} result={registrationResult} />
       )}
 
+      {/* ERROR */}
       {status === "error" && (
         <ErrorModal
           message={errorMessage}
@@ -284,3 +260,4 @@ export default function PlagiarismPages() {
     </div>
   );
 }
+

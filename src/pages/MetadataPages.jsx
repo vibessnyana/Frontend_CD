@@ -30,12 +30,9 @@ export default function MetadataPages() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
-
   const [reportData, setReportData] = useState(null);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportSaving, setReportSaving] = useState(false);
-
-  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -129,7 +126,6 @@ export default function MetadataPages() {
         .includes(search.toLowerCase());
 
       const matchKategori = kategori ? item.Kategori === kategori : true;
-
       const matchSub = subKategori
         ? item["Sub Kategori"] === subKategori
         : true;
@@ -193,19 +189,20 @@ export default function MetadataPages() {
       setReportSaving(true);
 
       const result = await saveMetadataReport(selectedId, payload);
+      const savedReport = result?.report || payload.report;
 
-      setReportData((prev) => ({
-        ...(prev || selected || {}),
+      setReportData((current) => ({
+        ...(current || selected || {}),
         ...result,
-        report: result?.report || payload.report,
+        report: savedReport,
       }));
 
-      setData((prev) =>
-        prev.map((item) =>
+      setData((current) =>
+        current.map((item) =>
           item._id === selectedId
             ? {
                 ...item,
-                report: result?.report || payload.report,
+                report: savedReport,
                 report_saved_at:
                   result?.report_saved_at ||
                   result?.reportSavedAt ||
@@ -225,22 +222,15 @@ export default function MetadataPages() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (deleteLoading) return;
-
     try {
-      setDeleteLoading(true);
-
       await deleteMetadata(selectedId);
 
       setData((prev) => prev.filter((item) => item._id !== selectedId));
       setMode("idle");
       setSelectedId(null);
-      setReportData(null);
       setSuccessMessage("Metadata berhasil dihapus!");
     } catch (err) {
       setErrorMessage(err.message || "Gagal menghapus metadata");
-    } finally {
-      setDeleteLoading(false);
     }
   };
 
@@ -266,7 +256,6 @@ export default function MetadataPages() {
       );
 
       setMode("idle");
-      setReportData(null);
       setSuccessMessage("Metadata berhasil disimpan!");
     } catch (err) {
       setErrorMessage(err.message || "Gagal menyimpan metadata");
@@ -346,7 +335,6 @@ export default function MetadataPages() {
       {mode === "delete" && selected && (
         <BaseModal onClose={() => setMode("idle")}>
           <ConfirmDelete
-            loading={deleteLoading}
             onConfirm={handleDeleteConfirm}
             onCancel={() => setMode("preview")}
           />

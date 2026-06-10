@@ -18,7 +18,6 @@ function mapSimilarityItem(item) {
     raw: item,
   };
 }
-console.log(mapSimilarityItem)
 
 function getScoreColor(riskLevel) {
   switch (riskLevel) {
