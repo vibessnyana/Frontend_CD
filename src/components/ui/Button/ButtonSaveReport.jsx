@@ -1,5 +1,5 @@
 export default function ButtonSaveReport({
-  children = "Save Report",
+  children = "Unduh Laporan",
   onClick,
   type = "button",
   disabled = false,

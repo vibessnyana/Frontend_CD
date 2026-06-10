@@ -66,15 +66,6 @@ function toPercent(value) {
   return number <= 1 ? number * 100 : number;
 }
 
-function toRatio(value) {
-  if (value === undefined || value === null || value === "") return null;
-
-  const number = Number(value);
-
-  if (Number.isNaN(number)) return null;
-
-  return number > 1 ? number / 100 : number;
-}
 
 function formatPercent(value) {
   const percent = toPercent(value);
@@ -122,9 +113,11 @@ function mapSimilarityItem(item) {
     ? metadata.image_url || ""
     : item?.source_url || item?.image_url || "";
 
+  const percent = toPercent(item?.final_score);
+
   return {
     img: imageUrl,
-    percent: Number(((item?.final_score || 0) * 100).toFixed(2)),
+    percent: percent === null ? 0 : Number(percent.toFixed(2)),
     title,
     owner: isInternal
       ? "Sumber: internal"
@@ -197,8 +190,6 @@ function buildReportPayload({ data, rawReport, previewImage }) {
   return {
     metadata_id: data?._id || data?.id || data?.metadata_id || null,
     check_id: rawReport?.check_id || data?.check_id || null,
-    ki_id: data?.ki_id || null,
-    ki_uuid: data?.ki_uuid || null,
     title: data?.["Judul KI"] || data?.title || rawReport?.title || "",
     image_url: previewImage || data?.image_url || rawReport?.image_url || "",
     saved_at: savedAt,
@@ -212,6 +203,58 @@ function buildReportPayload({ data, rawReport, previewImage }) {
   };
 }
 
+function buildPreviewReport(data) {
+  const imageUrl = data?.image_url || data?.imageUrl || "";
+  const title = data?.["Judul KI"] || data?.title || "Contoh karya";
+
+  return {
+    check_id: "preview-report",
+    registration_status: "review_required",
+    registration_reason:
+      "Ini adalah data contoh untuk melihat tampilan laporan. Data ini tidak berasal dari hasil pemeriksaan.",
+    image_url: imageUrl,
+    similarity_result: {
+      overall_score: 0.7425,
+      results: {
+        internal_top3: [
+          {
+            source: "internal",
+            final_score: 0.6812,
+            metadata: {
+              title: `${title} - Referensi Internal`,
+              image_url: imageUrl,
+            },
+          },
+        ],
+        external_top3: [
+          {
+            source: "external",
+            final_score: 0.7425,
+            title: "Contoh kandidat eksternal",
+            image_url: imageUrl,
+            source_url: "https://example.com/contoh-sumber",
+          },
+          {
+            source: "external",
+            final_score: 0.635,
+            title: "Contoh kandidat pembanding",
+            image_url: imageUrl,
+            source_url: "https://example.com/contoh-pembanding",
+          },
+        ],
+      },
+    },
+    decision_result: {
+      decision: {
+        status: "medium_similarity",
+        risk_level: "medium",
+        requires_review: true,
+        reason:
+          "Contoh keputusan sistem: hasil berada pada rentang kemiripan menengah dan memerlukan review manual.",
+      },
+    },
+  };
+}
 export default function ReportModal({
   data,
   report,
@@ -221,9 +264,15 @@ export default function ReportModal({
   onSaveReport,
 }) {
   const [selectedMatch, setSelectedMatch] = useState(null);
-  const [imageError, setImageError] = useState(false);
+  const [failedImageUrl, setFailedImageUrl] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
-  const rawReport = useMemo(() => getRawReport(data, report), [data, report]);
+  const storedReport = useMemo(() => getRawReport(data, report), [data, report]);
+  const isPreview = !storedReport && showPreview;
+  const rawReport = useMemo(
+    () => storedReport || (isPreview ? buildPreviewReport(data) : null),
+    [data, isPreview, storedReport]
+  );
 
   const decision = getDecision(rawReport);
 
@@ -243,6 +292,7 @@ export default function ReportModal({
   );
 
   const previewImage = getCloudinaryPreviewUrl(originalPreviewImage);
+
 
   const scoreValue = getScoreValue(rawReport);
   const scoreText = formatPercent(scoreValue);
@@ -273,10 +323,10 @@ export default function ReportModal({
   if (loading) {
     return (
       <div className="w-[420px] max-w-[90vw] rounded-2xl bg-white p-6 text-center shadow-xl">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-red-600"></div>
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-red-600" />
 
         <h2 className="mt-4 text-base font-semibold text-gray-700">
-          Mengambil report
+          Mengambil laporan
         </h2>
 
         <p className="mt-2 text-sm text-gray-400">
@@ -294,15 +344,25 @@ export default function ReportModal({
         </div>
 
         <h2 className="text-lg font-semibold text-gray-800">
-          Report belum tersedia
+          Laporan belum tersedia
         </h2>
 
         <p className="mt-2 text-sm leading-relaxed text-gray-500">
           Data metadata ini belum memiliki hasil similarity report dari database.
         </p>
 
-        <div className="mt-5 flex justify-center gap-3">
-          <ButtonCancel onClick={onCancel}>Cancel</ButtonCancel>
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <ButtonCancel onClick={onCancel}>Tutup</ButtonCancel>
+
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              onClick={() => setShowPreview(true)}
+              className="rounded-md bg-red-500 px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-600"
+            >
+              Lihat Contoh Tampilan
+            </button>
+          )}
         </div>
       </div>
     );
@@ -314,11 +374,11 @@ export default function ReportModal({
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium uppercase text-red-500">
-              Similarity Report
+              Laporan Kemiripan
             </p>
 
             <h2 className="text-lg font-semibold text-gray-800">
-              Hasil Kemiripan Metadata
+              Hasil Kemiripan Gambar
             </h2>
           </div>
 
@@ -326,15 +386,23 @@ export default function ReportModal({
             type="button"
             onClick={onCancel}
             className="rounded-md px-2 py-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Tutup laporan"
+            title="Tutup laporan"
           >
-            x
+            X
           </button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 pb-8">
-        <div className="flex gap-6">
-          <div className="basis-[52%] min-w-0">
+        {isPreview && (
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            Mode pratinjau menggunakan data contoh. Tombol unduh dinonaktifkan.
+          </div>
+        )}
+
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="min-w-0 lg:basis-[48%]">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-medium text-gray-700">
                 Preview Karya
@@ -343,12 +411,12 @@ export default function ReportModal({
               <p className="text-xs text-gray-400">Uploaded image</p>
             </div>
 
-            <div className="flex h-[430px] items-center justify-center rounded-xl border border-gray-100 bg-gray-50 p-4">
-              {previewImage && !imageError ? (
+            <div className="flex h-[300px] items-center justify-center rounded-xl border border-gray-100 bg-gray-50 p-4 sm:h-[380px] lg:h-[430px]">
+              {previewImage && failedImageUrl !== previewImage ? (
                 <img
                   src={previewImage}
                   alt={data?.["Judul KI"] || data?.title || "preview report"}
-                  onError={() => setImageError(true)}
+                  onError={() => setFailedImageUrl(previewImage)}
                   className="h-full w-full rounded-lg object-contain shadow-sm"
                 />
               ) : (
@@ -359,7 +427,7 @@ export default function ReportModal({
             </div>
           </div>
 
-          <div className="basis-[60%] min-w-0 border-l pl-6">
+          <div className="min-w-0 border-t pt-6 lg:basis-[52%] lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
             <div className="mb-4 grid grid-cols-2 gap-3">
               <div className="rounded-lg bg-gray-50 p-3">
                 <p className="text-xs text-gray-400">Skor kemiripan</p>
@@ -423,13 +491,13 @@ export default function ReportModal({
             </div>
 
             <div className="mt-5 flex justify-end gap-3 pb-2">
-              <ButtonCancel onClick={onCancel}>Cancel</ButtonCancel>
+              <ButtonCancel onClick={onCancel}>Tutup</ButtonCancel>
 
               <ButtonSaveReport
                 onClick={handleSaveReport}
-                disabled={saving || !rawReport}
+                disabled={saving || !rawReport || isPreview}
               >
-                {saving ? "Menyimpan..." : "Save Report"}
+                {saving ? "Menyiapkan..." : "Unduh Laporan"}
               </ButtonSaveReport>
             </div>
           </div>
