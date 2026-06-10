@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonSave from "../../ui/Button/ButtonSave.jsx";
-import { saveReportToLocalStorage } from "../../../services/ReportStorageService.jsx";
 
 const initialForm = {
   title: "",
@@ -22,20 +21,32 @@ function normalizePayload(values) {
   );
 }
 
-function buildReportPayload({ checkId, report, resultPercent, preview }) {
+function isPersistentUrl(url) {
+  if (!url) return false;
+
+  const value = String(url);
+
+  if (value.startsWith("blob:")) return false;
+  if (value.startsWith("data:")) return false;
+
+  return true;
+}
+
+function buildReportPayload({ checkId, report, resultPercent }) {
   if (!report) return null;
+
+  const imageUrl =
+    report.uploaded_image_url ||
+    report.uploadedImageUrl ||
+    report.image_url ||
+    report.imageUrl ||
+    "";
 
   return {
     ...report,
     check_id: checkId || report.check_id || null,
     result_percent: resultPercent,
-    uploaded_image_url:
-      preview ||
-      report.uploaded_image_url ||
-      report.uploadedImageUrl ||
-      report.image_url ||
-      report.imageUrl ||
-      "",
+    uploaded_image_url: isPersistentUrl(imageUrl) ? imageUrl : "",
     saved_at: new Date().toISOString(),
   };
 }
@@ -71,15 +82,6 @@ export default function PlagiarismForm({
       resultPercent,
       preview,
     });
-
-    if (reportPayload) {
-      saveReportToLocalStorage({
-        checkId,
-        title: normalizedValues.title,
-        imageUrl: reportPayload.uploaded_image_url,
-        report: reportPayload,
-      });
-    }
 
     onSubmit?.({
       check_id: checkId,

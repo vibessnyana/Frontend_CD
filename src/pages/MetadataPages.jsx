@@ -196,7 +196,8 @@ export default function MetadataPages() {
 
       setReportData((prev) => ({
         ...(prev || selected || {}),
-        report: payload.report,
+        ...result,
+        report: result?.report || payload.report,
       }));
 
       setData((prev) =>
@@ -204,18 +205,18 @@ export default function MetadataPages() {
           item._id === selectedId
             ? {
                 ...item,
-                report: payload.report,
+                report: result?.report || payload.report,
+                report_saved_at:
+                  result?.report_saved_at ||
+                  result?.reportSavedAt ||
+                  item.report_saved_at ||
+                  null,
               }
             : item
         )
       );
 
-      setSuccessMessage(
-        result?.message ||
-          (result?.downloaded
-            ? "Report berhasil diunduh!"
-            : "Report berhasil disimpan!")
-      );
+      setSuccessMessage(result?.message || "Report berhasil disimpan!");
     } catch (err) {
       setErrorMessage(err.message || "Gagal menyimpan report");
     } finally {

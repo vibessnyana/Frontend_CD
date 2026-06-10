@@ -1,8 +1,3 @@
-import {
-  findStoredReportByMetadata,
-  saveReportToLocalStorage,
-} from "./ReportStorageService.jsx";
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function getErrorMessage(error, fallback, status) {
@@ -33,23 +28,6 @@ async function throwRequestError(response, fallback) {
   throw new Error(getErrorMessage(error, fallback, response.status));
 }
 
-function downloadJsonFile(filename, data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
-    type: "application/json",
-  });
-
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
 function getMetadataArray(result) {
   if (Array.isArray(result)) {
     if (result.length === 1 && typeof result[0] === "object") {
@@ -63,7 +41,9 @@ function getMetadataArray(result) {
       if (Array.isArray(firstItem.payload)) return firstItem.payload;
 
       if (Array.isArray(firstItem.payload?.data)) return firstItem.payload.data;
-      if (Array.isArray(firstItem.payload?.items)) return firstItem.payload.items;
+      if (Array.isArray(firstItem.payload?.items)) {
+        return firstItem.payload.items;
+      }
 
       if (Array.isArray(firstItem.payload?.metadata)) {
         return firstItem.payload.metadata;
@@ -123,8 +103,21 @@ function getMetadataObject(result) {
   return result;
 }
 
+function getReportObject(item) {
+  return (
+    item?.report ??
+    item?.plagiarism_report ??
+    item?.plagiarismReport ??
+    item?.similarity_report ??
+    item?.similarityReport ??
+    item?.check_result ??
+    item?.checkResult ??
+    null
+  );
+}
+
 function normalizeMetadata(item, index = 0) {
-  const normalized = {
+  return {
     ...item,
 
     _id: String(
@@ -139,24 +132,11 @@ function normalizeMetadata(item, index = 0) {
 
     No: item.No ?? item.no ?? index + 1,
 
-    check_id:
-      item.check_id ??
-      item.checkId ??
-      item.checkID ??
-      "",
+    check_id: item.check_id ?? item.checkId ?? item.checkID ?? "",
 
-    ki_id:
-      item.ki_id ??
-      item.kiId ??
-      item.id_ki ??
-      item.idKI ??
-      "",
+    ki_id: item.ki_id ?? item.kiId ?? item.id_ki ?? item.idKI ?? "",
 
-    ki_uuid:
-      item.ki_uuid ??
-      item.kiUuid ??
-      item.uuid ??
-      "",
+    ki_uuid: item.ki_uuid ?? item.kiUuid ?? item.uuid ?? "",
 
     "Judul KI":
       item["Judul KI"] ??
@@ -211,77 +191,87 @@ function normalizeMetadata(item, index = 0) {
       item.copyright_sub_category ??
       "",
 
-    image_url:
-      item.image_url ??
-      item.imageUrl ??
-      item.image ??
-      item.gambar ??
-      "",
+    image_url: item.image_url ?? item.imageUrl ?? item.image ?? item.gambar ?? "",
 
     cloudinary_public_id:
-      item.cloudinary_public_id ??
-      item.cloudinaryPublicId ??
-      "",
+      item.cloudinary_public_id ?? item.cloudinaryPublicId ?? "",
 
-    report:
-      item.report ??
-      item.plagiarism_report ??
-      item.plagiarismReport ??
-      item.similarity_report ??
-      item.similarityReport ??
-      item.check_result ??
-      item.checkResult ??
-      null,
+    report: getReportObject(item),
+    report_saved_at: item.report_saved_at ?? item.reportSavedAt ?? null,
   };
+}
 
-  const storedReport = findStoredReportByMetadata(normalized);
+function normalizeReportResponse(result, fallbackMetadata = null) {
+  const reportObject = getMetadataObject(result);
 
-  if (!normalized.report && storedReport?.report) {
-    normalized.report = storedReport.report;
+  if (!reportObject) {
+    return fallbackMetadata;
   }
 
-  return normalized;
+  const report =
+    reportObject.report ??
+    reportObject.plagiarism_report ??
+    reportObject.plagiarismReport ??
+    reportObject.similarity_report ??
+    reportObject.similarityReport ??
+    reportObject.check_result ??
+    reportObject.checkResult ??
+    null;
+
+  return {
+    ...(fallbackMetadata || {}),
+    ...reportObject,
+    _id: String(
+      reportObject._id ??
+        reportObject.id ??
+        reportObject.metadata_id ??
+        reportObject.metadataId ??
+        fallbackMetadata?._id ??
+        ""
+    ),
+    check_id:
+      reportObject.check_id ??
+      reportObject.checkId ??
+      fallbackMetadata?.check_id ??
+      "",
+    title:
+      reportObject.title ??
+      reportObject["Judul KI"] ??
+      fallbackMetadata?.["Judul KI"] ??
+      "",
+    image_url:
+      reportObject.image_url ??
+      reportObject.imageUrl ??
+      fallbackMetadata?.image_url ??
+      "",
+    report,
+    report_saved_at:
+      reportObject.report_saved_at ??
+      reportObject.reportSavedAt ??
+      fallbackMetadata?.report_saved_at ??
+      null,
+  };
 }
 
 function toBackendPayload(data) {
   return {
-    title:
-      data["Judul KI"] ??
-      data.title ??
-      "",
+    title: data["Judul KI"] ?? data.title ?? "",
 
-    description:
-      data.Deskripsi ??
-      data.description ??
-      "",
+    description: data.Deskripsi ?? data.description ?? "",
 
-    category:
-      data.Kategori ??
-      data.category ??
-      "",
+    category: data.Kategori ?? data.category ?? "",
 
-    sub_category:
-      data["Sub Kategori"] ??
-      data.sub_category ??
-      "",
+    sub_category: data["Sub Kategori"] ?? data.sub_category ?? "",
 
     copyright_category:
-      data["Kategori HC"] ??
-      data.copyright_category ??
-      "",
+      data["Kategori HC"] ?? data.copyright_category ?? "",
 
     copyright_sub_category:
-      data["Sub Kategori HC"] ??
-      data.copyright_sub_category ??
-      "",
+      data["Sub Kategori HC"] ?? data.copyright_sub_category ?? "",
 
-    image_url:
-      data.image_url ??
-      "",
+    image_url: data.image_url ?? "",
 
-    cloudinary_public_id:
-      data.cloudinary_public_id ??
-      "",
+    cloudinary_public_id: data.cloudinary_public_id ?? "",
   };
 }
 
@@ -298,11 +288,7 @@ export async function getMetadataList() {
 
   const metadataList = getMetadataArray(result);
 
-  const normalizedData = metadataList.map((item, index) =>
-    normalizeMetadata(item, index)
-  );
-
-  return normalizedData;
+  return metadataList.map((item, index) => normalizeMetadata(item, index));
 }
 
 export async function getMetadataReport(metadataId) {
@@ -314,7 +300,8 @@ export async function getMetadataReport(metadataId) {
   );
 
   if (reportResponse.ok) {
-    return reportResponse.json().catch(() => null);
+    const result = await reportResponse.json().catch(() => null);
+    return normalizeReportResponse(result);
   }
 
   if (![404, 405].includes(reportResponse.status)) {
@@ -337,21 +324,13 @@ export async function getMetadataReport(metadataId) {
   const metadataObject = getMetadataObject(result);
 
   if (!metadataObject) {
-    return result;
+    return null;
   }
 
   return normalizeMetadata(metadataObject);
 }
 
 export async function saveMetadataReport(metadataId, payload) {
-  saveReportToLocalStorage({
-    metadataId,
-    checkId: payload?.check_id || payload?.report?.check_id,
-    title: payload?.title,
-    imageUrl: payload?.image_url,
-    report: payload?.report,
-  });
-
   const response = await fetch(`${API_BASE_URL}/metadata/${metadataId}/report`, {
     method: "POST",
     headers: {
@@ -360,30 +339,18 @@ export async function saveMetadataReport(metadataId, payload) {
     body: JSON.stringify(payload),
   });
 
-  if (response.ok) {
-    return response.json().catch(() => ({
+  if (!response.ok) {
+    await throwRequestError(response, "Gagal menyimpan report metadata");
+  }
+
+  const result = await response.json().catch(() => null);
+
+  return (
+    normalizeReportResponse(result) || {
       saved: true,
       message: "Report berhasil disimpan!",
-    }));
-  }
-
-  if ([404, 405].includes(response.status)) {
-    const timestamp = new Date()
-      .toISOString()
-      .replaceAll(":", "-")
-      .replaceAll(".", "-");
-
-    downloadJsonFile(`metadata-report-${metadataId}-${timestamp}.json`, payload);
-
-    return {
-      saved: false,
-      downloaded: true,
-      message:
-        "Endpoint save report belum tersedia, report disimpan sementara dan diunduh sebagai file JSON.",
-    };
-  }
-
-  await throwRequestError(response, "Gagal menyimpan report metadata");
+    }
+  );
 }
 
 export async function updateMetadata(metadataId, payload) {
