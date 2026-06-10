@@ -86,35 +86,63 @@ function getDownloadDateName() {
 }
 
 function getMatchTitle(item) {
-  return item?.metadata?.title || item?.title || "Tanpa judul";
+  return (
+    item?.metadata?.title ||
+    item?.metadata?.["Judul KI"] ||
+    item?.title ||
+    item?.judul ||
+    "Tanpa judul"
+  );
 }
 
 function getMatchDescription(item) {
-  return item?.metadata?.description || "-";
+  return item?.metadata?.description || item?.description || "-";
 }
 
 function getMatchCategory(item) {
-  return item?.metadata?.category || "-";
+  return item?.metadata?.category || item?.category || "-";
 }
 
 function getMatchSubCategory(item) {
-  return item?.metadata?.sub_category || "-";
+  return item?.metadata?.sub_category || item?.sub_category || "-";
 }
 
 function getMatchCopyrightCategory(item) {
-  return item?.metadata?.copyright_category || "-";
+  return (
+    item?.metadata?.copyright_category ||
+    item?.copyright_category ||
+    "-"
+  );
 }
 
 function getMatchCopyrightSubCategory(item) {
-  return item?.metadata?.copyright_sub_category || "-";
+  return (
+    item?.metadata?.copyright_sub_category ||
+    item?.copyright_sub_category ||
+    "-"
+  );
 }
 
 function getMatchImageUrl(item) {
-  return item?.metadata?.image_url || item?.image_url || "-";
+  return (
+    item?.metadata?.image_url ||
+    item?.metadata?.imageUrl ||
+    item?.image_url ||
+    item?.imageUrl ||
+    "-"
+  );
 }
 
 function getMatchSourceUrl(item) {
-  return item?.source_url || item?.metadata?.image_url || item?.image_url || "-";
+  return (
+    item?.source_url ||
+    item?.sourceUrl ||
+    item?.metadata?.image_url ||
+    item?.metadata?.imageUrl ||
+    item?.image_url ||
+    item?.imageUrl ||
+    "-"
+  );
 }
 
 function createSheet(data, columnWidths = []) {
@@ -164,12 +192,12 @@ function buildSummarySheetData({
     [],
     ["BEST MATCH"],
     ["Sumber", getSafeValue(bestMatch.source)],
-    ["Judul", getSafeValue(bestMatch.title)],
+    ["Judul", getMatchTitle(bestMatch)],
     ["Skor Akhir (%)", toPercent(bestMatch.final_score)],
     ["Konteks Visual / CLIP (%)", toPercent(bestMatch.clip_score)],
     ["Detail Visual / CNN (%)", toPercent(bestMatch.cnn_score)],
-    ["Image URL", getSafeValue(bestMatch.image_url)],
-    ["Source URL", getSafeValue(bestMatch.source_url)],
+    ["Image URL", getMatchImageUrl(bestMatch)],
+    ["Source URL", getMatchSourceUrl(bestMatch)],
   ];
 }
 
