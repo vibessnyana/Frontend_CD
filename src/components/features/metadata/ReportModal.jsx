@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
-import ButtonSaveReport from "../../ui/Button/ButtonSaveReport.jsx";
+import ButtonDownloadReport from "../../ui/Button/ButtonDownloadReport.jsx";
 import SimilarityList from "../plagiarism/SimilarityList.jsx";
 import SimilarityDetailModal from "../plagiarism/SimilarityDetailModal.jsx";
+import { downloadSimilarityReport } from "../../../utils/downloadSimilarityReport.js";
 
 function getCloudinaryPreviewUrl(url) {
   if (
@@ -184,25 +185,6 @@ function capitalizeText(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function buildReportPayload({ data, rawReport, previewImage }) {
-  const savedAt = new Date().toISOString();
-
-  return {
-    metadata_id: data?._id || data?.id || data?.metadata_id || null,
-    check_id: rawReport?.check_id || data?.check_id || null,
-    title: data?.["Judul KI"] || data?.title || rawReport?.title || "",
-    image_url: previewImage || data?.image_url || rawReport?.image_url || "",
-    saved_at: savedAt,
-
-    report: {
-      ...rawReport,
-      check_id: rawReport?.check_id || data?.check_id || null,
-      image_url: previewImage || data?.image_url || rawReport?.image_url || "",
-      saved_at: savedAt,
-    },
-  };
-}
-
 function buildPreviewReport(data) {
   const imageUrl = data?.image_url || data?.imageUrl || "";
   const title = data?.["Judul KI"] || data?.title || "Contoh karya";
@@ -259,9 +241,7 @@ export default function ReportModal({
   data,
   report,
   loading = false,
-  saving = false,
   onCancel,
-  onSaveReport,
 }) {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [failedImageUrl, setFailedImageUrl] = useState("");
@@ -308,16 +288,13 @@ export default function ReportModal({
     rawReport?.similarity_result || rawReport?.decision_result
   );
 
-  const handleSaveReport = () => {
-    if (!onSaveReport || !rawReport || saving) return;
+  const handleDownloadReport = () => {
+    if (!rawReport || isPreview) return;
 
-    const payload = buildReportPayload({
-      data,
-      rawReport,
-      previewImage: originalPreviewImage,
+    downloadSimilarityReport({
+      result: rawReport,
+      fileName: data?.["Judul KI"] || data?.title || rawReport?.check_id,
     });
-
-    onSaveReport(payload);
   };
 
   if (loading) {
@@ -493,12 +470,12 @@ export default function ReportModal({
             <div className="mt-5 flex justify-end gap-3 pb-2">
               <ButtonCancel onClick={onCancel}>Tutup</ButtonCancel>
 
-              <ButtonSaveReport
-                onClick={handleSaveReport}
-                disabled={saving || !rawReport || isPreview}
+              <ButtonDownloadReport
+                onClick={handleDownloadReport}
+                disabled={!rawReport || isPreview}
               >
-                {saving ? "Menyiapkan..." : "Unduh Laporan"}
-              </ButtonSaveReport>
+                Download Report
+              </ButtonDownloadReport>
             </div>
           </div>
         </div>

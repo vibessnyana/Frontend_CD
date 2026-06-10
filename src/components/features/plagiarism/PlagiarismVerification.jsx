@@ -1,11 +1,11 @@
 ﻿import { useState } from "react";
-import * as XLSX from "xlsx";
 
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonAction from "../../ui/Button/ButtonAction.jsx";
 import ButtonDownloadReport from "../../ui/Button/ButtonDownloadReport.jsx";
 import SimilarityList from "./SimilarityList.jsx";
 import SimilarityDetailModal from "./SimilarityDetailModal.jsx";
+import { downloadSimilarityReport } from "../../../utils/downloadSimilarityReport.js";
 
 function mapSimilarityItem(item) {
   const metadata = item.metadata || {};
@@ -52,6 +52,9 @@ function getRiskBadgeClass(riskLevel) {
   }
 }
 
+/*
+ * Report generation now lives in utils/downloadSimilarityReport.js.
+ * This legacy block is retained temporarily to keep this refactor scoped.
 function toPercent(value) {
   if (value === undefined || value === null || value === "") return "-";
 
@@ -353,6 +356,7 @@ function downloadExcelReport({
 
   XLSX.writeFile(workbook, downloadFileName);
 }
+*/
 
 export default function PlagiarismVerification({
   preview,
@@ -408,11 +412,11 @@ export default function PlagiarismVerification({
   const handleDownloadReport = () => {
     if (!result) return;
 
-    downloadExcelReport({
+    downloadSimilarityReport({
       result,
       resultPercent,
       threshold,
-      uploadedFileName: fileName,
+      fileName,
     });
   };
 
