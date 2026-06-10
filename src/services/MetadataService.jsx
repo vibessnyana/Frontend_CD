@@ -48,8 +48,8 @@ function getMetadataArray(result) {
     }
 
     return result;
+    
   }
-
   const candidates = [
     result?.data,
     result?.items,

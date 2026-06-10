@@ -161,6 +161,7 @@ export default function MetadataPages() {
   }, [search, kategori, subKategori, currentPage]);
 
   const handleSelect = (item) => {
+    console.log("Selected item:", item);
     setSelectedId(item._id);
     setReportData(null);
     setMode("preview");

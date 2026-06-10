@@ -21,6 +21,8 @@ function getCloudinaryPreviewUrl(url) {
   );
 }
 
+
+
 function isValidImageUrl(url) {
   if (!url) return false;
 
@@ -56,6 +58,7 @@ function getRawReport(data, report) {
 
   return null;
 }
+
 
 function toPercent(value) {
   if (value === undefined || value === null || value === "") return null;

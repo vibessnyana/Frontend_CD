@@ -22,6 +22,7 @@ function mapSimilarityItem(item) {
   };
 }
 
+
 function getScoreColor(riskLevel) {
   switch (riskLevel) {
     case "high":
