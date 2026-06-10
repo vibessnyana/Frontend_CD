@@ -35,6 +35,8 @@ export default function MetadataPages() {
   const [reportLoading, setReportLoading] = useState(false);
   const [reportSaving, setReportSaving] = useState(false);
 
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -194,7 +196,8 @@ export default function MetadataPages() {
 
       setReportData((prev) => ({
         ...(prev || selected || {}),
-        report: payload.report,
+        ...result,
+        report: result?.report || payload.report,
       }));
 
       setData((prev) =>
@@ -202,18 +205,18 @@ export default function MetadataPages() {
           item._id === selectedId
             ? {
                 ...item,
-                report: payload.report,
+                report: result?.report || payload.report,
+                report_saved_at:
+                  result?.report_saved_at ||
+                  result?.reportSavedAt ||
+                  item.report_saved_at ||
+                  null,
               }
             : item
         )
       );
 
-      setSuccessMessage(
-        result?.message ||
-          (result?.downloaded
-            ? "Report berhasil diunduh!"
-            : "Report berhasil disimpan!")
-      );
+      setSuccessMessage(result?.message || "Report berhasil disimpan!");
     } catch (err) {
       setErrorMessage(err.message || "Gagal menyimpan report");
     } finally {
@@ -222,7 +225,11 @@ export default function MetadataPages() {
   };
 
   const handleDeleteConfirm = async () => {
+    if (deleteLoading) return;
+
     try {
+      setDeleteLoading(true);
+
       await deleteMetadata(selectedId);
 
       setData((prev) => prev.filter((item) => item._id !== selectedId));
@@ -232,6 +239,8 @@ export default function MetadataPages() {
       setSuccessMessage("Metadata berhasil dihapus!");
     } catch (err) {
       setErrorMessage(err.message || "Gagal menghapus metadata");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -337,6 +346,7 @@ export default function MetadataPages() {
       {mode === "delete" && selected && (
         <BaseModal onClose={() => setMode("idle")}>
           <ConfirmDelete
+            loading={deleteLoading}
             onConfirm={handleDeleteConfirm}
             onCancel={() => setMode("preview")}
           />
@@ -374,4 +384,3 @@ export default function MetadataPages() {
     </div>
   );
 }
-

@@ -4,7 +4,6 @@ import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonSaveReport from "../../ui/Button/ButtonSaveReport.jsx";
 import SimilarityList from "../plagiarism/SimilarityList.jsx";
 import SimilarityDetailModal from "../plagiarism/SimilarityDetailModal.jsx";
-import { findStoredReportByMetadata } from "../../../services/ReportStorageService.jsx";
 
 function getCloudinaryPreviewUrl(url) {
   if (
@@ -37,8 +36,7 @@ function firstValidImageUrl(...urls) {
 }
 
 function getRawReport(data, report) {
-  const storedReport = findStoredReportByMetadata(data);
-  const source = report || storedReport || data || {};
+  const source = report || data || {};
 
   return (
     source.report ||
@@ -49,7 +47,7 @@ function getRawReport(data, report) {
     source.check_result ||
     source.checkResult ||
     source.result ||
-    source
+    null
   );
 }
 
@@ -98,6 +96,7 @@ function getScoreValue(report) {
     report?.similarity_score ??
     report?.final_score ??
     report?.score ??
+    report?.similarity_result?.overall_score ??
     report?.similarity_result?.highest_score ??
     report?.similarity_result?.highest_final_score ??
     report?.decision_result?.decision?.highest_score ??
@@ -263,11 +262,11 @@ function buildReportPayload({
   previewImage,
 }) {
   return {
-    metadata_id: data?._id || null,
+    metadata_id: data?._id || data?.id || data?.metadata_id || null,
     check_id: data?.check_id || rawReport?.check_id || null,
     ki_id: data?.ki_id || null,
     ki_uuid: data?.ki_uuid || null,
-    title: data?.["Judul KI"] || rawReport?.title || "",
+    title: data?.["Judul KI"] || data?.title || rawReport?.title || "",
     image_url: previewImage || data?.image_url || rawReport?.image_url || "",
     saved_at: new Date().toISOString(),
 
@@ -350,7 +349,7 @@ export default function ReportModal({
   const scoreColor = getScoreColor(riskLevel);
   const statusClass = getStatusClass(registrationStatus);
 
-  const { internal, external } = getResultGroups(rawReport);
+  const { internal, external } = getResultGroups(rawReport || {});
 
   const internalData = internal.map((item) =>
     mapSimilarityItem(item, "internal")
@@ -363,15 +362,13 @@ export default function ReportModal({
   const hasReport =
     Boolean(rawReport?.similarity_result) ||
     Boolean(rawReport?.decision_result) ||
-    Boolean(rawReport?.report) ||
-    Boolean(rawReport?.plagiarism_report) ||
-    Boolean(rawReport?.check_id) ||
+    Boolean(rawReport?.results) ||
     internalData.length > 0 ||
     externalData.length > 0 ||
     scoreValue !== undefined;
 
   const handleSaveReport = () => {
-    if (!onSaveReport) return;
+    if (!onSaveReport || !rawReport) return;
 
     const payload = buildReportPayload({
       data,
@@ -416,7 +413,7 @@ export default function ReportModal({
         </h2>
 
         <p className="mt-2 text-sm leading-relaxed text-gray-500">
-          Data metadata ini belum memiliki hasil similarity report.
+          Data metadata ini belum memiliki hasil similarity report dari database.
         </p>
 
         <div className="mt-5 flex justify-center gap-3">

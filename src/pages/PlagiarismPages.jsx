@@ -18,8 +18,6 @@ import {
   rejectReviewCheck,
 } from "../services/PlagiarismService.jsx";
 
-import { saveReportToLocalStorage } from "../services/ReportStorageService.jsx";
-
 function normalizePercent(value) {
   return Number((Number(value || 0) * 100).toFixed(2));
 }
@@ -30,38 +28,6 @@ function toDecimalThresholds(value) {
     medium: Number(value.medium) / 100,
     low: Number(value.low) / 100,
   };
-}
-
-function getRegisteredMetadataId(response) {
-  return String(
-    response?._id ??
-      response?.id ??
-      response?.metadata_id ??
-      response?.metadataId ??
-      response?.data?._id ??
-      response?.data?.id ??
-      response?.data?.metadata_id ??
-      response?.data?.metadataId ??
-      response?.metadata?._id ??
-      response?.metadata?.id ??
-      response?.metadata?.metadata_id ??
-      response?.metadata?.metadataId ??
-      ""
-  );
-}
-
-function getRegisteredImageUrl(response) {
-  return (
-    response?.image_url ||
-    response?.imageUrl ||
-    response?.data?.image_url ||
-    response?.data?.imageUrl ||
-    response?.metadata?.image_url ||
-    response?.metadata?.imageUrl ||
-    response?.item?.image_url ||
-    response?.item?.imageUrl ||
-    ""
-  );
 }
 
 export default function PlagiarismPages() {
@@ -105,21 +71,7 @@ export default function PlagiarismPages() {
       setIsSavingMetadata(true);
       setErrorMessage("");
 
-      const { report, ...backendPayload } = metadataPayload;
-
-      const response = await registerMetadata(backendPayload);
-      const metadataId = getRegisteredMetadataId(response);
-      const registeredImageUrl = getRegisteredImageUrl(response);
-
-      if (report) {
-        saveReportToLocalStorage({
-          metadataId,
-          checkId: metadataPayload.check_id,
-          title: metadataPayload.title,
-          imageUrl: registeredImageUrl,
-          report,
-        });
-      }
+      const response = await registerMetadata(metadataPayload);
 
       setRegistrationResult(response);
       setStatus("success");
