@@ -1,3 +1,8 @@
+import {
+  findStoredReportByMetadata,
+  saveReportToLocalStorage,
+} from "./ReportStorageService.jsx";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function getErrorMessage(error, fallback, status) {
@@ -28,6 +33,23 @@ async function throwRequestError(response, fallback) {
   throw new Error(getErrorMessage(error, fallback, response.status));
 }
 
+function downloadJsonFile(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function getMetadataArray(result) {
   if (Array.isArray(result)) {
     if (result.length === 1 && typeof result[0] === "object") {
@@ -42,9 +64,18 @@ function getMetadataArray(result) {
 
       if (Array.isArray(firstItem.payload?.data)) return firstItem.payload.data;
       if (Array.isArray(firstItem.payload?.items)) return firstItem.payload.items;
-      if (Array.isArray(firstItem.payload?.metadata)) return firstItem.payload.metadata;
-      if (Array.isArray(firstItem.payload?.results)) return firstItem.payload.results;
-      if (Array.isArray(firstItem.payload?.records)) return firstItem.payload.records;
+
+      if (Array.isArray(firstItem.payload?.metadata)) {
+        return firstItem.payload.metadata;
+      }
+
+      if (Array.isArray(firstItem.payload?.results)) {
+        return firstItem.payload.results;
+      }
+
+      if (Array.isArray(firstItem.payload?.records)) {
+        return firstItem.payload.records;
+      }
     }
 
     return result;
@@ -93,7 +124,7 @@ function getMetadataObject(result) {
 }
 
 function normalizeMetadata(item, index = 0) {
-  return {
+  const normalized = {
     ...item,
 
     _id: String(
@@ -107,6 +138,12 @@ function normalizeMetadata(item, index = 0) {
     ),
 
     No: item.No ?? item.no ?? index + 1,
+
+    check_id:
+      item.check_id ??
+      item.checkId ??
+      item.checkID ??
+      "",
 
     ki_id:
       item.ki_id ??
@@ -185,7 +222,25 @@ function normalizeMetadata(item, index = 0) {
       item.cloudinary_public_id ??
       item.cloudinaryPublicId ??
       "",
+
+    report:
+      item.report ??
+      item.plagiarism_report ??
+      item.plagiarismReport ??
+      item.similarity_report ??
+      item.similarityReport ??
+      item.check_result ??
+      item.checkResult ??
+      null,
   };
+
+  const storedReport = findStoredReportByMetadata(normalized);
+
+  if (!normalized.report && storedReport?.report) {
+    normalized.report = storedReport.report;
+  }
+
+  return normalized;
 }
 
 function toBackendPayload(data) {
@@ -246,7 +301,89 @@ export async function getMetadataList() {
   const normalizedData = metadataList.map((item, index) =>
     normalizeMetadata(item, index)
   );
+
   return normalizedData;
+}
+
+export async function getMetadataReport(metadataId) {
+  const reportResponse = await fetch(
+    `${API_BASE_URL}/metadata/${metadataId}/report`,
+    {
+      method: "GET",
+    }
+  );
+
+  if (reportResponse.ok) {
+    return reportResponse.json().catch(() => null);
+  }
+
+  if (![404, 405].includes(reportResponse.status)) {
+    await throwRequestError(reportResponse, "Gagal mengambil report metadata");
+  }
+
+  const metadataResponse = await fetch(`${API_BASE_URL}/metadata/${metadataId}`, {
+    method: "GET",
+  });
+
+  if (!metadataResponse.ok) {
+    if ([404, 405].includes(metadataResponse.status)) {
+      return null;
+    }
+
+    await throwRequestError(metadataResponse, "Gagal mengambil report metadata");
+  }
+
+  const result = await metadataResponse.json().catch(() => null);
+  const metadataObject = getMetadataObject(result);
+
+  if (!metadataObject) {
+    return result;
+  }
+
+  return normalizeMetadata(metadataObject);
+}
+
+export async function saveMetadataReport(metadataId, payload) {
+  saveReportToLocalStorage({
+    metadataId,
+    checkId: payload?.check_id || payload?.report?.check_id,
+    title: payload?.title,
+    imageUrl: payload?.image_url,
+    report: payload?.report,
+  });
+
+  const response = await fetch(`${API_BASE_URL}/metadata/${metadataId}/report`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (response.ok) {
+    return response.json().catch(() => ({
+      saved: true,
+      message: "Report berhasil disimpan!",
+    }));
+  }
+
+  if ([404, 405].includes(response.status)) {
+    const timestamp = new Date()
+      .toISOString()
+      .replaceAll(":", "-")
+      .replaceAll(".", "-");
+
+    downloadJsonFile(`metadata-report-${metadataId}-${timestamp}.json`, payload);
+
+    return {
+      saved: false,
+      downloaded: true,
+      message:
+        "Endpoint save report belum tersedia, report disimpan sementara dan diunduh sebagai file JSON.",
+    };
+  }
+
+  await throwRequestError(response, "Gagal menyimpan report metadata");
 }
 
 export async function updateMetadata(metadataId, payload) {
