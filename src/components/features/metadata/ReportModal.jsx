@@ -36,161 +36,102 @@ function firstValidImageUrl(...urls) {
 }
 
 function getRawReport(data, report) {
-  const source = report || data || {};
+  const source = report || data || null;
 
-  return (
-    source.report ||
-    source.plagiarism_report ||
-    source.plagiarismReport ||
-    source.similarity_report ||
-    source.similarityReport ||
-    source.check_result ||
-    source.checkResult ||
-    source.result ||
-    null
-  );
-}
+  if (!source) return null;
 
-function getNumber(value) {
-  if (value === undefined || value === null || value === "") return null;
+  const reportFromSource = source.report || data?.report || null;
 
-  if (typeof value === "string") {
-    const cleaned = value.replace("%", "").trim();
-    const parsed = Number(cleaned);
-
-    return Number.isNaN(parsed) ? null : parsed;
+  if (
+    reportFromSource?.similarity_result ||
+    reportFromSource?.decision_result
+  ) {
+    return reportFromSource;
   }
 
-  const parsed = Number(value);
+  if (source?.similarity_result || source?.decision_result) {
+    return source;
+  }
 
-  return Number.isNaN(parsed) ? null : parsed;
+  return null;
 }
 
 function toPercent(value) {
-  const number = getNumber(value);
-  if (number === null) return null;
+  if (value === undefined || value === null || value === "") return null;
+
+  const number = Number(value);
+
+  if (Number.isNaN(number)) return null;
 
   return number <= 1 ? number * 100 : number;
 }
 
 function toRatio(value) {
-  const number = getNumber(value);
-  if (number === null) return undefined;
+  if (value === undefined || value === null || value === "") return null;
+
+  const number = Number(value);
+
+  if (Number.isNaN(number)) return null;
 
   return number > 1 ? number / 100 : number;
 }
 
 function formatPercent(value) {
   const percent = toPercent(value);
+
   if (percent === null) return "-";
 
   return `${Number(percent.toFixed(2))}%`;
 }
 
 function getScoreValue(report) {
-  return (
-    report?.resultPercent ??
-    report?.result_percent ??
-    report?.score_percent ??
-    report?.similarity_percent ??
-    report?.similarity_score ??
-    report?.final_score ??
-    report?.score ??
-    report?.similarity_result?.overall_score ??
-    report?.similarity_result?.highest_score ??
-    report?.similarity_result?.highest_final_score ??
-    report?.decision_result?.decision?.highest_score ??
-    report?.decision_result?.decision?.score
-  );
+  return report?.similarity_result?.overall_score ?? null;
+}
+
+function getDecision(report) {
+  return report?.decision_result?.decision || null;
 }
 
 function getResultGroups(report) {
-  const results = report?.similarity_result?.results || report?.results || {};
+  const results = report?.similarity_result?.results || {};
 
   return {
-    internal:
-      results.internal_top3 ||
-      results.internal ||
-      report?.internal_top3 ||
-      report?.top3_internal ||
-      [],
+    internal: Array.isArray(results.internal_top3)
+      ? results.internal_top3
+      : [],
 
-    external:
-      results.external_top3 ||
-      results.external ||
-      report?.external_top3 ||
-      report?.top3_external ||
-      [],
+    external: Array.isArray(results.external_top3)
+      ? results.external_top3
+      : [],
   };
 }
 
-function mapSimilarityItem(item, sourceType) {
+function mapSimilarityItem(item) {
   const metadata = item?.metadata || {};
-  const source = item?.source || sourceType;
+  const isInternal = item?.source === "internal";
 
-  const score =
-    item?.final_score ??
-    item?.score ??
-    item?.similarity_score ??
-    item?.percent;
+  const imageUrl = isInternal
+    ? metadata.image_url || item?.image_url || ""
+    : item?.image_url || "";
 
-  const clipScore =
-    item?.clip_score ??
-    item?.context_score ??
-    item?.visual_context_score;
+  const title = isInternal
+    ? metadata.title || "Tanpa judul"
+    : item?.title || "Tanpa judul";
 
-  const cnnScore =
-    item?.cnn_score ??
-    item?.detail_score ??
-    item?.visual_detail_score;
-
-  const imageUrl =
-    metadata.image_url ||
-    metadata.imageUrl ||
-    item?.image_url ||
-    item?.imageUrl ||
-    item?.thumbnail_url ||
-    item?.thumbnailUrl ||
-    item?.img ||
-    item?.url ||
-    "";
-
-  const title =
-    metadata.title ||
-    metadata["Judul KI"] ||
-    item?.title ||
-    item?.judul ||
-    item?.name ||
-    "Tanpa judul";
-
-  const sourceUrl =
-    item?.source_url ||
-    item?.sourceUrl ||
-    item?.url ||
-    metadata.image_url ||
-    "";
+  const sourceUrl = isInternal
+    ? metadata.image_url || ""
+    : item?.source_url || item?.image_url || "";
 
   return {
     img: imageUrl,
-    percent: Number((toPercent(score) || 0).toFixed(2)),
+    percent: Number(((item?.final_score || 0) * 100).toFixed(2)),
     title,
-    owner:
-      source === "internal"
-        ? "Sumber: internal"
-        : item?.owner || sourceUrl || "Sumber: external",
+    owner: isInternal
+      ? "Sumber: internal"
+      : item?.source_url || "Sumber: external",
     sourceUrl,
-    sourceType: source,
-    raw: {
-      ...item,
-      source,
-      metadata,
-      final_score: toRatio(score),
-      clip_score: toRatio(clipScore),
-      cnn_score: toRatio(cnnScore),
-      source_url: sourceUrl,
-      image_url: imageUrl,
-      title,
-    },
+    sourceType: item?.source,
+    raw: item,
   };
 }
 
@@ -250,42 +191,23 @@ function capitalizeText(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function buildReportPayload({
-  data,
-  rawReport,
-  internalData,
-  externalData,
-  scoreValue,
-  registrationStatus,
-  registrationReason,
-  decision,
-  previewImage,
-}) {
+function buildReportPayload({ data, rawReport, previewImage }) {
+  const savedAt = new Date().toISOString();
+
   return {
     metadata_id: data?._id || data?.id || data?.metadata_id || null,
-    check_id: data?.check_id || rawReport?.check_id || null,
+    check_id: rawReport?.check_id || data?.check_id || null,
     ki_id: data?.ki_id || null,
     ki_uuid: data?.ki_uuid || null,
     title: data?.["Judul KI"] || data?.title || rawReport?.title || "",
     image_url: previewImage || data?.image_url || rawReport?.image_url || "",
-    saved_at: new Date().toISOString(),
+    saved_at: savedAt,
 
     report: {
       ...rawReport,
-      check_id: data?.check_id || rawReport?.check_id || null,
+      check_id: rawReport?.check_id || data?.check_id || null,
       image_url: previewImage || data?.image_url || rawReport?.image_url || "",
-      final_score: toRatio(scoreValue),
-      registration_status: registrationStatus,
-      registration_reason: registrationReason,
-      decision_result: rawReport?.decision_result || {
-        decision,
-      },
-      similarity_result: rawReport?.similarity_result || {
-        results: {
-          internal_top3: internalData.map((item) => item.raw),
-          external_top3: externalData.map((item) => item.raw),
-        },
-      },
+      saved_at: savedAt,
     },
   };
 }
@@ -303,43 +225,21 @@ export default function ReportModal({
 
   const rawReport = useMemo(() => getRawReport(data, report), [data, report]);
 
-  const decision =
-    rawReport?.decision_result?.decision ||
-    rawReport?.decision ||
-    rawReport?.system_decision ||
-    null;
+  const decision = getDecision(rawReport);
 
-  const riskLevel = String(
-    decision?.risk_level ||
-      rawReport?.risk_level ||
-      rawReport?.riskLevel ||
-      "unknown"
-  ).toLowerCase();
+  const riskLevel = String(decision?.risk_level || "unknown").toLowerCase();
 
   const registrationStatus =
-    rawReport?.registration_status ||
-    rawReport?.registrationStatus ||
-    rawReport?.status ||
-    data?.registration_status ||
-    "-";
+    rawReport?.registration_status || data?.registration_status || "-";
 
   const registrationReason =
-    rawReport?.registration_reason ||
-    rawReport?.registrationReason ||
-    decision?.reason ||
-    "";
+    rawReport?.registration_reason || decision?.reason || "";
 
   const originalPreviewImage = firstValidImageUrl(
     data?.image_url,
     data?.imageUrl,
-    data?.image,
-    data?.gambar,
-    rawReport?.metadata?.image_url,
-    rawReport?.metadata?.imageUrl,
     rawReport?.image_url,
-    rawReport?.imageUrl,
-    rawReport?.uploaded_image_url,
-    rawReport?.uploadedImageUrl
+    rawReport?.uploaded_image_url
   );
 
   const previewImage = getCloudinaryPreviewUrl(originalPreviewImage);
@@ -349,36 +249,21 @@ export default function ReportModal({
   const scoreColor = getScoreColor(riskLevel);
   const statusClass = getStatusClass(registrationStatus);
 
-  const { internal, external } = getResultGroups(rawReport || {});
+  const { internal, external } = getResultGroups(rawReport);
 
-  const internalData = internal.map((item) =>
-    mapSimilarityItem(item, "internal")
+  const internalData = internal.map(mapSimilarityItem);
+  const externalData = external.map(mapSimilarityItem);
+
+  const hasReport = Boolean(
+    rawReport?.similarity_result || rawReport?.decision_result
   );
-
-  const externalData = external.map((item) =>
-    mapSimilarityItem(item, "external")
-  );
-
-  const hasReport =
-    Boolean(rawReport?.similarity_result) ||
-    Boolean(rawReport?.decision_result) ||
-    Boolean(rawReport?.results) ||
-    internalData.length > 0 ||
-    externalData.length > 0 ||
-    scoreValue !== undefined;
 
   const handleSaveReport = () => {
-    if (!onSaveReport || !rawReport) return;
+    if (!onSaveReport || !rawReport || saving) return;
 
     const payload = buildReportPayload({
       data,
       rawReport,
-      internalData,
-      externalData,
-      scoreValue,
-      registrationStatus,
-      registrationReason,
-      decision,
       previewImage: originalPreviewImage,
     });
 
@@ -462,7 +347,7 @@ export default function ReportModal({
               {previewImage && !imageError ? (
                 <img
                   src={previewImage}
-                  alt={data?.["Judul KI"] || "preview report"}
+                  alt={data?.["Judul KI"] || data?.title || "preview report"}
                   onError={() => setImageError(true)}
                   className="h-full w-full rounded-lg object-contain shadow-sm"
                 />
@@ -526,7 +411,7 @@ export default function ReportModal({
                 </div>
 
                 <p className="leading-relaxed">
-                  {decision.reason || registrationReason || "-"}
+                  {decision.reason || "-"}
                 </p>
               </div>
             )}
@@ -540,7 +425,10 @@ export default function ReportModal({
             <div className="mt-5 flex justify-end gap-3 pb-2">
               <ButtonCancel onClick={onCancel}>Cancel</ButtonCancel>
 
-              <ButtonSaveReport onClick={handleSaveReport} disabled={saving}>
+              <ButtonSaveReport
+                onClick={handleSaveReport}
+                disabled={saving || !rawReport}
+              >
                 {saving ? "Menyimpan..." : "Save Report"}
               </ButtonSaveReport>
             </div>

@@ -1,7 +1,7 @@
 import ButtonCancel from "../../ui/Button/ButtonCancel.jsx";
 import ButtonConfirmDelete from "../../ui/Button/ButtonConfirmDelete.jsx";
 
-export default function ConfirmDelete({ onConfirm, onCancel }) {
+export default function ConfirmDelete({ onConfirm, onCancel, loading = false }) {
   return (
     <div className="bg-white w-[400px] rounded-2xl shadow-xl p-6 text-center">
 
@@ -15,7 +15,7 @@ export default function ConfirmDelete({ onConfirm, onCancel }) {
           Cancel
         </ButtonCancel>
 
-        <ButtonConfirmDelete onClick={onConfirm}>
+        <ButtonConfirmDelete onClick={onConfirm} disabled={loading}>
           Yes
         </ButtonConfirmDelete>
 
