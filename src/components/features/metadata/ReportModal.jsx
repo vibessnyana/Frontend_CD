@@ -297,6 +297,10 @@ export default function ReportModal({
     downloadSimilarityReport({
       result: rawReport,
       fileName: data?.["Judul KI"] || data?.title || rawReport?.check_id,
+      imageUrl: previewImage,
+      metadata: data,
+      mode: "registered",
+      reportTitle: "Laporan Pemeriksaan Kemiripan Gambar",
     });
   };
 
