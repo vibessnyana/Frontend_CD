@@ -12,7 +12,7 @@ export default function ItemCard({ item, onSelect, priority = false }) {
   const title = item["Judul KI"] || "Gambar metadata";
   const thumbnailUrl = getCloudinaryImageUrl(
     item.image_url,
-    "f_auto,q_auto,w_400,h_300,c_fit"
+    "f_auto,q_auto,w_220,h_170,c_fit"
   );
 
   return (

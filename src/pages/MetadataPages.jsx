@@ -151,17 +151,18 @@ export default function MetadataPages() {
   );
 
   useEffect(() => {
+    if (loading) return;
+
     setPageLoading(true);
 
     const timeout = setTimeout(() => {
       setPageLoading(false);
-    }, 500);
+    }, 200);
 
     return () => clearTimeout(timeout);
-  }, [search, kategori, subKategori, currentPage]);
+  }, [search, kategori, subKategori, currentPage, loading]);
 
   const handleSelect = (item) => {
-    console.log("Selected item:", item);
     setSelectedId(item._id);
     setReportData(null);
     setMode("preview");
